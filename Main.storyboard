@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_72" orientation="portrait" appearance="dark"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="s0d-6b-0kx">
+            <objects>
+                <viewController storyboardIdentifier="Welcome" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Y6W-OH-hqX" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
+                        <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j1G-z3-1Mj">
+                                <rect key="frame" x="0.0" y="59" width="5490" height="110"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Day Clouds" translatesAutoresizingMaskIntoConstraints="NO" id="iei-S9-YXY">
+                                        <rect key="frame" x="0.0" y="0.0" width="2745" height="110"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="110" id="ESL-z5-TEJ"/>
+                                            <constraint firstAttribute="width" constant="2745" id="c66-9v-Qy1"/>
+                                        </constraints>
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Day Clouds" translatesAutoresizingMaskIntoConstraints="NO" id="gUq-5I-b3y">
+                                        <rect key="frame" x="2745" y="0.0" width="2745" height="110"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="2745" id="Fff-ZY-Kng"/>
+                                            <constraint firstAttribute="height" constant="110" id="T11-sK-MMK"/>
+                                        </constraints>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="iei-S9-YXY" secondAttribute="bottom" id="FOJ-mQ-9ka"/>
+                                    <constraint firstAttribute="trailing" secondItem="gUq-5I-b3y" secondAttribute="trailing" id="Jbw-GD-N5k"/>
+                                    <constraint firstItem="gUq-5I-b3y" firstAttribute="leading" secondItem="iei-S9-YXY" secondAttribute="trailing" id="N8L-SF-6Qi"/>
+                                    <constraint firstAttribute="height" constant="110" id="W31-Oc-65n"/>
+                                    <constraint firstItem="gUq-5I-b3y" firstAttribute="top" secondItem="j1G-z3-1Mj" secondAttribute="top" id="Xr1-ae-pSN"/>
+                                    <constraint firstAttribute="width" constant="5490" id="Y4n-Xf-SQI"/>
+                                    <constraint firstAttribute="bottom" secondItem="gUq-5I-b3y" secondAttribute="bottom" id="bsd-Ir-dTr"/>
+                                    <constraint firstItem="iei-S9-YXY" firstAttribute="leading" secondItem="j1G-z3-1Mj" secondAttribute="leading" id="hOu-Ye-lO0"/>
+                                    <constraint firstItem="iei-S9-YXY" firstAttribute="top" secondItem="j1G-z3-1Mj" secondAttribute="top" id="lTP-6b-2oA"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
+                        <constraints>
+                            <constraint firstItem="j1G-z3-1Mj" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="UsU-XU-WWa"/>
+                            <constraint firstItem="j1G-z3-1Mj" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="XaD-K1-uvB"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cloudOne" destination="iei-S9-YXY" id="ElJ-p1-R1I"/>
+                        <outlet property="cloudTwo" destination="gUq-5I-b3y" id="k7o-0D-BD9"/>
+                        <outlet property="cloudView" destination="j1G-z3-1Mj" id="m21-SR-5Ps"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="101.4641288433382" y="4.6875"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Day Clouds" width="1000" height="40"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
