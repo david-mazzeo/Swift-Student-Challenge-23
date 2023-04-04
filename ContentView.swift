@@ -10,6 +10,8 @@ enum Time {
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
+    @IBOutlet weak var starView: UIView!
+    
     @IBOutlet weak var cloudView: UIView!
     @IBOutlet weak var cloudOne: UIImageView!
     @IBOutlet weak var cloudTwo: UIImageView!
@@ -18,6 +20,16 @@ class ViewController: UIViewController, CAAnimationDelegate {
         super.viewDidLoad()
         
         // MARK: View Initialisation
+        starView.backgroundColor = UIColor(patternImage: UIImage(named: "Star Pattern.png")!)
+        let starGradient = CAGradientLayer()
+        
+        starGradient.frame = starView.bounds
+        starGradient.colors = [UIColor.white.cgColor, UIColor.clear.cgColor]
+        starGradient.startPoint = CGPointMake(0, 0.8)
+        starGradient.endPoint = CGPointMake(0, 1)
+        
+        starView.layer.mask = starGradient
+        starView.alpha = 0
         
         // Sets up and displays the inital background gradient.
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
@@ -40,6 +52,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
             })
         }).fire()
         
+        // MARK: Begins passing time.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
             cycleTime(time: .Evening)
         }
@@ -65,8 +78,20 @@ class ViewController: UIViewController, CAAnimationDelegate {
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
         animation.delegate = self
         
+        if time == .Night {
+            UIView.animate(withDuration: 10) { [self] in
+                starView.alpha = 1
+            }
+        }
+        
+        if time == .Sunrise {
+            UIView.animate(withDuration: 10) { [self] in
+                starView.alpha = 0
+            }
+        }
+        
         CATransaction.setCompletionBlock { [self] in
-            if time == .Daytime || time == .Night{
+            if time == .Daytime || time == .Night {
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
                     if time == .Daytime {

@@ -2,8 +2,10 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_72" orientation="portrait" appearance="dark"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -15,6 +17,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K2C-lk-9rc">
+                                <rect key="frame" x="0.0" y="0.0" width="430" height="250"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="250" id="cye-w1-aSS"/>
+                                </constraints>
+                            </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j1G-z3-1Mj">
                                 <rect key="frame" x="0.0" y="59" width="5490" height="110"/>
                                 <subviews>
@@ -45,25 +54,76 @@
                                     <constraint firstItem="iei-S9-YXY" firstAttribute="top" secondItem="j1G-z3-1Mj" secondAttribute="top" id="lTP-6b-2oA"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VvB-vn-uqR">
+                                <rect key="frame" x="67.333333333333343" y="846.33333333333337" width="295.33333333333326" height="35.666666666666629"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="Made with ❤️ by David Mazzeo." cornerStyle="large">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <segue destination="HGE-vU-Wet" kind="show" id="K0X-1Z-jJ2"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rZJ-Oh-1np">
+                                <rect key="frame" x="134.66666666666666" y="433" width="160.99999999999997" height="66"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="161" id="2ut-Uv-Ig7"/>
+                                    <constraint firstAttribute="height" constant="66" id="H1h-uD-khe"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Take Off" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="30"/>
+                                    <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <color key="baseBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <constraints>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="VvB-vn-uqR" secondAttribute="bottom" constant="16" id="7Jg-yN-Mtl"/>
+                            <constraint firstItem="VvB-vn-uqR" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="7MV-xX-LcB"/>
+                            <constraint firstItem="K2C-lk-9rc" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="HYT-7d-Nvr"/>
+                            <constraint firstItem="K2C-lk-9rc" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="K7Y-h7-lBv"/>
+                            <constraint firstItem="K2C-lk-9rc" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="TTE-GS-5lh"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="UsU-XU-WWa"/>
+                            <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="VLT-ok-LOq"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="XaD-K1-uvB"/>
+                            <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="if2-uQ-R63"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="cloudOne" destination="iei-S9-YXY" id="ElJ-p1-R1I"/>
                         <outlet property="cloudTwo" destination="gUq-5I-b3y" id="k7o-0D-BD9"/>
                         <outlet property="cloudView" destination="j1G-z3-1Mj" id="m21-SR-5Ps"/>
+                        <outlet property="starView" destination="K2C-lk-9rc" id="r21-lc-pU1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="100.46511627906976" y="4.5064377682403434"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="sm3-9c-5pa">
+            <objects>
+                <viewController id="HGE-vU-Wet" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="xmT-3c-LKH">
+                        <rect key="frame" x="0.0" y="0.0" width="430" height="863"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="sle-xd-nVi"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="hNa-h4-U2R"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VVQ-nM-yfT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="100" y="680"/>
+        </scene>
     </scenes>
     <resources>
         <image name="Day Clouds" width="1000" height="40"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>
