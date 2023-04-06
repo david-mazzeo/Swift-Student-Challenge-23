@@ -77,6 +77,9 @@
                                     <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <color key="baseBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <segue destination="HL5-gg-izn" kind="show" id="I1l-nZ-b4M"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
@@ -103,6 +106,38 @@
             </objects>
             <point key="canvasLocation" x="100.46511627906976" y="4.5064377682403434"/>
         </scene>
+        <!--Space Flight Controller-->
+        <scene sceneID="pQp-N7-TsT">
+            <objects>
+                <viewController id="HL5-gg-izn" customClass="SpaceFlightController" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="grN-WA-gES">
+                        <rect key="frame" x="0.0" y="0.0" width="430" height="863"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Rocket 1" translatesAutoresizingMaskIntoConstraints="NO" id="5Ip-Sa-Ie2">
+                                <rect key="frame" x="0.0" y="710" width="81" height="128"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="128" id="YNG-cq-X9I"/>
+                                    <constraint firstAttribute="width" constant="81" id="msK-la-IwI"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="jP6-Qz-5Kv"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="jP6-Qz-5Kv" firstAttribute="bottom" secondItem="5Ip-Sa-Ie2" secondAttribute="bottom" constant="25" id="1SM-99-tOj"/>
+                            <constraint firstItem="5Ip-Sa-Ie2" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" id="myN-Pc-kVm"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="TdS-EU-0gC"/>
+                    <connections>
+                        <outlet property="rocketView" destination="5Ip-Sa-Ie2" id="81w-nA-Yez"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AId-Wz-dO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="886.04651162790697" y="4.5064377682403434"/>
+        </scene>
         <!--View Controller-->
         <scene sceneID="sm3-9c-5pa">
             <objects>
@@ -122,6 +157,7 @@
     </scenes>
     <resources>
         <image name="Day Clouds" width="1000" height="40"/>
+        <image name="Rocket 1" width="18" height="30"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
