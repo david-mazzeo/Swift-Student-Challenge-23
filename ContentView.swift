@@ -10,26 +10,29 @@ enum Time {
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
+    var timer = Timer()
     @IBOutlet weak var starView: UIView!
     
     @IBOutlet weak var cloudView: UIView!
     @IBOutlet weak var cloudOne: UIImageView!
     @IBOutlet weak var cloudTwo: UIImageView!
     
+    @IBAction func go(_ sender: Any) {
+        view.layer.removeAllAnimations()
+        cloudView.layer.removeAllAnimations()
+        timer.invalidate()
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true, completion: nil)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
         // MARK: View Initialisation
-        starView.backgroundColor = UIColor(patternImage: UIImage(named: "Star Pattern.png")!)
-        let starGradient = CAGradientLayer()
-        
-        starGradient.frame = starView.bounds
-        starGradient.colors = [UIColor.white.cgColor, UIColor.clear.cgColor]
-        starGradient.startPoint = CGPointMake(0, 0.8)
-        starGradient.endPoint = CGPointMake(0, 1)
-        
-        starView.layer.mask = starGradient
-        starView.alpha = 0
         
         // Sets up and displays the inital background gradient.
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
@@ -45,18 +48,41 @@ class ViewController: UIViewController, CAAnimationDelegate {
         cloudTwo.layer.magnificationFilter = .nearest
         
         // MARK: Cloud Cover
-        Timer.scheduledTimer(withTimeInterval: 100, repeats: true, block: { [self] timer in
-            cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
-            UIView.animate(withDuration: 100, delay: 0, options: [.curveLinear], animations: { [self] in
-                cloudView.transform = CGAffineTransform(translationX: -2745, y: 0)
-            })
-        }).fire()
+        initTimer()
         
         // MARK: Begins passing time.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
             cycleTime(time: .Evening)
         }
         
+    }
+    
+    func initTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 100, repeats: true, block: { [self] timer in
+            cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
+            UIView.animate(withDuration: 100, delay: 0, options: [.curveLinear], animations: { [self] in
+                cloudView.transform = CGAffineTransform(translationX: -2745, y: 0)
+            })
+        })
+        
+        timer.fire()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        timer.invalidate()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        starView.backgroundColor = UIColor(patternImage: UIImage(named: "Star Pattern.png")!)
+        let starGradient = CAGradientLayer()
+        
+        starGradient.frame = starView.bounds
+        starGradient.colors = [UIColor.white.cgColor, UIColor.clear.cgColor]
+        starGradient.startPoint = CGPointMake(0, 0.8)
+        starGradient.endPoint = CGPointMake(0, 1)
+        
+        starView.layer.mask = starGradient
+        starView.alpha = 0
     }
     
     func cycleTime(time: Time) {

@@ -24,6 +24,7 @@ class SpaceFlightController: UIViewController {
 
 class FlightScene: SKScene {
     
+    var isSetup = false
     let motionEngine = CMMotionManager()
     let rocketImages = [SKTexture(image: UIImage(named: "Rocket 1")!),
                         SKTexture(image: UIImage(named: "Rocket 2")!),
@@ -37,6 +38,11 @@ class FlightScene: SKScene {
     
     override func didMove(to view: SKView) {
         
+        self.view?.ignoresSiblingOrder = true
+        self.view?.scene?.shouldRasterize = true
+        self.view?.showsFPS = true
+        self.view?.showsNodeCount = true
+        
         for image in rocketImages {
             image.filteringMode = .nearest
         }
@@ -44,36 +50,41 @@ class FlightScene: SKScene {
         motionEngine.accelerometerUpdateInterval = 1/60
         motionEngine.gyroUpdateInterval = 1/60
         
-        motionEngine.startAccelerometerUpdates()
+        motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
+            let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
+    //        if xAxis >= 0.2 || xAxis <= -0.2 {
+            if isSetup {
+                protagonist.physicsBody!.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
+            }
+                
+                print(xAxis as Any)
+    //        }
+        })
+        
         run(SKAction.run { [self] in
             
             protagonist.size = CGSize(width: 72, height: 120)
-            protagonist.zPosition = 1
             protagonist.position = CGPoint(x: 50, y: 90)
+            protagonist.zRotation = 0
+            
+            protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
+            protagonist.physicsBody?.isDynamic = true
+            protagonist.physicsBody?.mass = 0.02
+            protagonist.physicsBody?.affectedByGravity = false
+            protagonist.physicsBody?.allowsRotation = false
+            protagonist.constraints = [SKConstraint.zRotation(SKRange(lowerLimit: 0, upperLimit: 0))]
+            
+            self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
 
             let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: rocketImages, timePerFrame: 0.1))
             protagonist.run(rocketAnimation)
             
             self.addChild(protagonist)
+            isSetup = true
             
         })
         
     }
-    
-    override func update(_ currentTime: TimeInterval) {
-        processUserMotion(forUpdate: currentTime)
-    }
-    
-    func processUserMotion(forUpdate currentTime: CFTimeInterval) {
-        let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
-        let xAxisAdjusted = (xAxis + 1) / 2
-        let screenWidth = UIScreen.main.bounds.width
-
-        protagonist.position = CGPoint(x: CGFloat(xAxisAdjusted * screenWidth), y: 90)
-        
-        print(xAxis as Any)
-    }
-    
     
 }
 
