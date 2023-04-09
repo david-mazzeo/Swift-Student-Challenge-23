@@ -12,6 +12,28 @@ import CoreMotion
 class SpaceFlightController: UIViewController {
     
     @IBOutlet weak var spriteKitView: SKView!
+    @IBOutlet weak var elementOneButton: UIButton!
+    @IBOutlet weak var elementTwoButton: UIButton!
+    
+    @IBAction func elementOneFire(_ sender: Any) {
+        elementTwoButton.isEnabled = false
+        NotificationCenter.default.post(name: NSNotification.Name("fire"), object: nil, userInfo: ["element": 1])
+    }
+    
+    @IBAction func elementOneReleased(_ sender: Any) {
+        elementTwoButton.isEnabled = true
+        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil, userInfo: ["element": 1])
+    }
+    
+    @IBAction func elementTwoFire(_ sender: Any) {
+        elementOneButton.isEnabled = false
+        NotificationCenter.default.post(name: NSNotification.Name("fire"), object: nil, userInfo: ["element": 2])
+    }
+    
+    @IBAction func elementTwoReleased(_ sender: Any) {
+        elementOneButton.isEnabled = true
+        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil, userInfo: ["element": 2])
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,10 +44,8 @@ class SpaceFlightController: UIViewController {
     
 }
 
-class FlightScene: SKScene {
+class FlightScene: SKScene, SKPhysicsContactDelegate {
     
-    var isSetup = false
-    let motionEngine = CMMotionManager()
     let rocketImages = [SKTexture(image: UIImage(named: "Rocket 1")!),
                         SKTexture(image: UIImage(named: "Rocket 2")!),
                         SKTexture(image: UIImage(named: "Rocket 3")!),
@@ -34,16 +54,34 @@ class FlightScene: SKScene {
                         SKTexture(image: UIImage(named: "Rocket 5")!),
                         SKTexture(image: UIImage(named: "Rocket 6")!)]
     
+    let greenChargeUpImages = [SKTexture(image: UIImage(named: "Green Beam 1")!),
+                               SKTexture(image: UIImage(named: "Green Beam 2")!),
+                               SKTexture(image: UIImage(named: "Green Beam 3")!),
+                               SKTexture(image: UIImage(named: "Green Beam 4")!),
+                               SKTexture(image: UIImage(named: "Green Beam 5")!),
+                               SKTexture(image: UIImage(named: "Green Beam 6")!)]
+    
+    var isSetup = false
+    var isBeamActive = false
+    let motionEngine = CMMotionManager()
+    
     let protagonist = Rocket(imageNamed: "Rocket 1.png")
+    let beam = SKShapeNode()
     
     override func didMove(to view: SKView) {
         
-        self.view?.ignoresSiblingOrder = true
-        self.view?.scene?.shouldRasterize = true
+        NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: NSNotification.Name("released"), object: nil)
+        
         self.view?.showsFPS = true
         self.view?.showsNodeCount = true
+        physicsWorld.contactDelegate = self
         
         for image in rocketImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in greenChargeUpImages {
             image.filteringMode = .nearest
         }
         
@@ -52,19 +90,15 @@ class FlightScene: SKScene {
         
         motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
-    //        if xAxis >= 0.2 || xAxis <= -0.2 {
             if isSetup {
                 protagonist.physicsBody!.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
             }
-                
-                print(xAxis as Any)
-    //        }
         })
         
         run(SKAction.run { [self] in
             
-            protagonist.size = CGSize(width: 72, height: 120)
-            protagonist.position = CGPoint(x: 50, y: 90)
+            protagonist.size = CGSize(width: 86, height: 120)
+            protagonist.position = CGPoint(x: 50, y: 263)
             protagonist.zRotation = 0
             
             protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
@@ -72,7 +106,9 @@ class FlightScene: SKScene {
             protagonist.physicsBody?.mass = 0.02
             protagonist.physicsBody?.affectedByGravity = false
             protagonist.physicsBody?.allowsRotation = false
-            protagonist.constraints = [SKConstraint.zRotation(SKRange(lowerLimit: 0, upperLimit: 0))]
+            protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
+                                       SKConstraint.positionY(SKRange(constantValue: 263)),
+                                       SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: UIScreen.main.bounds.width))]
             
             self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
 
@@ -84,10 +120,127 @@ class FlightScene: SKScene {
             
         })
         
+        run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.run(addAsteroidOne),
+            SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+        
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        
+    }
+    
+    func random() -> CGFloat {
+        return CGFloat(Float(arc4random()) / 4294967296)
+    }
+    
+    func randomBesides(min: CGFloat, max: CGFloat, besidesMin: CGFloat, besidesMax: CGFloat) -> CGFloat {
+        var value = random() * (max - min) + min
+        
+        while value > besidesMin && value < besidesMax {
+            value = random() * (max - min) + min
+        }
+        
+        return value
+    }
+    
+    func random(min: CGFloat, max: CGFloat) -> CGFloat {
+        return random() * (max - min) + min
+    }
+    
+    func addAsteroidOne() {
+        let texture = SKTexture(image: UIImage(named: "Asteroid 1")!)
+        texture.filteringMode = .nearest
+        
+        let asteroid = Asteroid(texture: texture)
+        
+        asteroid.size = CGSize(width: 96, height: 80)
+        asteroid.position = CGPoint(x: random(min: 0, max: UIScreen.main.bounds.width), y: UIScreen.main.bounds.height + 100)
+        
+        asteroid.physicsBody = SKPhysicsBody(rectangleOf: asteroid.size)
+        asteroid.physicsBody?.isDynamic = true
+        asteroid.physicsBody?.affectedByGravity = false
+        asteroid.physicsBody?.collisionBitMask = 0
+        
+        self.addChild(asteroid)
+        
+        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: UIScreen.main.bounds.width), y: 0), duration: TimeInterval(random(min: 1, max: 2)))
+        asteroid.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
+        
+    }
+    
+    @objc func fireLaser(_ notification: Notification) {
+        let chargeUpView = SKSpriteNode(texture: greenChargeUpImages.first)
+        
+        chargeUpView.size = CGSize(width: 24, height: 18)
+        chargeUpView.position = CGPoint(x: 0, y: 70)
+        
+        protagonist.addChild(chargeUpView)
+        
+        let chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/12)
+        
+        chargeUpView.run(SKAction.sequence([chargeUpAnimation, SKAction.removeFromParent(), SKAction.run { [self] in
+            
+            var colour = UIColor()
+            protagonist.addChild(beam)
+            
+            let element = notification.userInfo?["element"] as? Int
+            
+            switch element {
+            case 1: colour = .green
+            case 2: colour = .blue
+            default: break
+            }
+            
+            beam.path = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: UIScreen.main.bounds.height - 339)).cgPath
+            beam.lineWidth = 6
+            beam.strokeColor = colour
+//
+//            beam.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: UIScreen.main.bounds.height - 339))
+//            beam.physicsBody?.isDynamic = true
+//            beam.physicsBody?.affectedByGravity = false
+//            beam.physicsBody?.allowsRotation = false
+//            beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
+//                                SKConstraint.positionY(SKRange(constantValue: 283)),
+//                                SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: UIScreen.main.bounds.width))]
+            
+            isBeamActive = true
+            
+            let particles = [SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode()]
+            
+            for particle in particles {
+                particle.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: 2, height: 1)).cgPath
+                particle.strokeColor = colour
+                particle.lineWidth = 1
+                
+                beam.addChild(particle)
+            }
+            
+            
+            run(SKAction.repeatForever(SKAction.sequence([
+                SKAction.run { [self] in
+                    for particle in particles {
+                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: UIScreen.main.bounds.height - 339))
+                    }
+                },
+                SKAction.wait(forDuration: 0.4, withRange: 0.2)])))
+            
+        }]))
+        
+    }
+    
+    @objc func endLaser(_ notification: Notification) {
+        beam.removeAllChildren()
+        protagonist.removeAllChildren()
+        isBeamActive = false
     }
     
 }
 
 class Rocket: SKSpriteNode {
+    
+}
+
+class Asteroid: SKSpriteNode {
     
 }

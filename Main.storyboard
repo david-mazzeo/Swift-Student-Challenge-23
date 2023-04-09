@@ -117,20 +117,60 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <skView contentMode="scaleToFill" preferredFramesPerSecond="60" translatesAutoresizingMaskIntoConstraints="NO" id="5h4-MU-TuJ">
-                                <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
+                                <rect key="frame" x="0.0" y="-100" width="430" height="1132"/>
                             </skView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lbc-Js-FKN">
+                                <rect key="frame" x="20" y="825" width="190" height="57"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="57" id="hOm-aq-6aG"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="Hydrochloric Acid" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="baseForegroundColor" systemColor="systemGreenColor"/>
+                                    <color key="baseBackgroundColor" systemColor="systemGreenColor"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="elementOneFire:" destination="HL5-gg-izn" eventType="touchDown" id="Bjl-TH-kvG"/>
+                                    <action selector="elementOneReleased:" destination="HL5-gg-izn" eventType="touchDragExit" id="U9x-XX-feO"/>
+                                    <action selector="elementOneReleased:" destination="HL5-gg-izn" eventType="touchUpInside" id="wdP-w0-ihc"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="edm-lE-ZMZ">
+                                <rect key="frame" x="220" y="825" width="190" height="57"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="57" id="RBJ-b2-f7f"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="[]" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="elementTwoFire:" destination="HL5-gg-izn" eventType="touchDown" id="5kH-uO-ZKc"/>
+                                    <action selector="elementTwoReleased:" destination="HL5-gg-izn" eventType="touchUpInside" id="SnV-W3-7n1"/>
+                                    <action selector="elementTwoReleased:" destination="HL5-gg-izn" eventType="touchDragExit" id="Zb1-Uq-CRE"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="jP6-Qz-5Kv"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="5h4-MU-TuJ" secondAttribute="bottom" id="KGo-Dh-HVm"/>
+                            <constraint firstItem="jP6-Qz-5Kv" firstAttribute="trailing" secondItem="edm-lE-ZMZ" secondAttribute="trailing" constant="20" id="3u8-Vo-OTm"/>
+                            <constraint firstItem="lbc-Js-FKN" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" constant="20" id="DBi-ey-NDq"/>
+                            <constraint firstAttribute="bottom" secondItem="5h4-MU-TuJ" secondAttribute="bottom" constant="-100" id="KGo-Dh-HVm"/>
                             <constraint firstItem="5h4-MU-TuJ" firstAttribute="trailing" secondItem="jP6-Qz-5Kv" secondAttribute="trailing" id="QAt-PE-6TF"/>
-                            <constraint firstItem="5h4-MU-TuJ" firstAttribute="top" secondItem="grN-WA-gES" secondAttribute="top" id="dEs-MH-UqU"/>
+                            <constraint firstItem="jP6-Qz-5Kv" firstAttribute="bottom" secondItem="lbc-Js-FKN" secondAttribute="bottom" constant="16" id="SkU-yX-TVA"/>
+                            <constraint firstItem="5h4-MU-TuJ" firstAttribute="top" secondItem="grN-WA-gES" secondAttribute="top" constant="-100" id="dEs-MH-UqU"/>
+                            <constraint firstItem="edm-lE-ZMZ" firstAttribute="width" secondItem="lbc-Js-FKN" secondAttribute="width" id="eCY-pG-6tU"/>
+                            <constraint firstItem="edm-lE-ZMZ" firstAttribute="leading" secondItem="lbc-Js-FKN" secondAttribute="trailing" constant="10" id="mbO-yS-FJm"/>
                             <constraint firstItem="5h4-MU-TuJ" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" id="oPO-pz-WpR"/>
+                            <constraint firstItem="jP6-Qz-5Kv" firstAttribute="bottom" secondItem="edm-lE-ZMZ" secondAttribute="bottom" constant="16" id="ps5-do-0at"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="TdS-EU-0gC"/>
                     <connections>
+                        <outlet property="elementOneButton" destination="lbc-Js-FKN" id="41M-nI-71o"/>
+                        <outlet property="elementTwoButton" destination="edm-lE-ZMZ" id="iNQ-f1-ptJ"/>
                         <outlet property="spriteKitView" destination="5h4-MU-TuJ" id="xwK-JE-Bsi"/>
                     </connections>
                 </viewController>
@@ -159,6 +199,9 @@
         <image name="Day Clouds" width="1000" height="40"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGreenColor">
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemTealColor">
             <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
