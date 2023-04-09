@@ -73,6 +73,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: NSNotification.Name("released"), object: nil)
         
+        self.view?.showsPhysics = true
         self.view?.showsFPS = true
         self.view?.showsNodeCount = true
         physicsWorld.contactDelegate = self
@@ -92,6 +93,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
             if isSetup {
                 protagonist.physicsBody!.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
+                beam.physicsBody?.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
             }
         })
         
@@ -127,7 +129,11 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
+        print("CONTACT \(contact.bodyA.node?.name) / \(contact.bodyB.node?.name)")
         
+        if contact.bodyA.node?.name == "Beam" && contact.bodyB.node?.name == "Asteroid" {
+            contact.bodyB.node?.removeFromParent()
+        }
     }
     
     func random() -> CGFloat {
@@ -161,6 +167,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         asteroid.physicsBody?.isDynamic = true
         asteroid.physicsBody?.affectedByGravity = false
         asteroid.physicsBody?.collisionBitMask = 0
+        asteroid.name = "Asteroid"
+        asteroid.physicsBody?.contactTestBitMask = 1
         
         self.addChild(asteroid)
         
@@ -192,17 +200,22 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             default: break
             }
             
-            beam.path = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: UIScreen.main.bounds.height - 339)).cgPath
+            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: UIScreen.main.bounds.height - 339)).cgPath
+            
+            beam.path = beamPath
             beam.lineWidth = 6
             beam.strokeColor = colour
-//
-//            beam.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: UIScreen.main.bounds.height - 339))
-//            beam.physicsBody?.isDynamic = true
-//            beam.physicsBody?.affectedByGravity = false
+            
+            beam.name = "Beam"
+            beam.physicsBody = SKPhysicsBody(edgeChainFrom: beamPath)
+            beam.physicsBody?.isDynamic = true
+            beam.physicsBody?.affectedByGravity = false
 //            beam.physicsBody?.allowsRotation = false
-//            beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-//                                SKConstraint.positionY(SKRange(constantValue: 283)),
-//                                SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: UIScreen.main.bounds.width))]
+            beam.physicsBody?.collisionBitMask = 0
+            beam.physicsBody?.contactTestBitMask = 1
+            beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
+                                SKConstraint.positionY(SKRange(constantValue: 0)),
+                                SKConstraint.positionX(SKRange(constantValue: 0))]
             
             isBeamActive = true
             
