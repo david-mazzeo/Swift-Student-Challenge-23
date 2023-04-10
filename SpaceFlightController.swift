@@ -119,7 +119,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             protagonist.physicsBody?.allowsRotation = false
             protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
                                        SKConstraint.positionY(SKRange(constantValue: 163)),
-                                       SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: deviceWidth))]
+                                       SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: deviceWidth - 1))]
             
             self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
 
@@ -174,19 +174,16 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         let dialogueFont = UIFont.systemFont(ofSize: 18, weight: .regular)
         let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Fake text; blah, blah, blah. Things and stuff will go here, but not yet. For now, all that lies here is a string of dummy text.", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
-//        dialogueLabel.position = CGPoint(x: 270 - (deviceWidth / 2), y: 0)
         dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
         dialogueLabel.horizontalAlignmentMode = .left
         dialogueLabel.verticalAlignmentMode = .top
         dialogueLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
         dialogueLabel.numberOfLines = 0
         dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
-         
+        
         croppedFrame.addChild(portrait)
         croppedFrame.addChild(speakerLabel)
         croppedFrame.addChild(dialogueLabel)
-        
-        print(dialogueLabel.frame.width)
         
         self.addChild(TVScreen)
         self.addChild(croppedFrame)
