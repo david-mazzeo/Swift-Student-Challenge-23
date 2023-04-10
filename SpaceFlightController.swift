@@ -61,21 +61,26 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                                SKTexture(image: UIImage(named: "Green Beam 5")!),
                                SKTexture(image: UIImage(named: "Green Beam 6")!)]
     
+    let scientistImages = [SKTexture(image: UIImage(named: "Scientist 1")!),
+                           SKTexture(image: UIImage(named: "Scientist 2")!)]
+    
     var isSetup = false
     var isBeamActive = false
     let motionEngine = CMMotionManager()
     
+    let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
     let protagonist = Rocket(imageNamed: "Rocket 1.png")
+    let croppedFrame = SKCropNode()
     let beam = SKShapeNode()
+    
+    let deviceHeight = UIScreen.main.bounds.height
+    let deviceWidth = UIScreen.main.bounds.width
     
     override func didMove(to view: SKView) {
         
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: NSNotification.Name("released"), object: nil)
         
-        self.view?.showsPhysics = true
-        self.view?.showsFPS = true
-        self.view?.showsNodeCount = true
         physicsWorld.contactDelegate = self
         
         for image in rocketImages {
@@ -86,6 +91,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             image.filteringMode = .nearest
         }
         
+        for image in scientistImages {
+            image.filteringMode = .nearest
+        }
+        
         motionEngine.accelerometerUpdateInterval = 1/60
         motionEngine.gyroUpdateInterval = 1/60
         
@@ -93,7 +102,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
             if isSetup {
                 protagonist.physicsBody!.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
-                beam.physicsBody?.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
             }
         })
         
@@ -110,7 +118,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             protagonist.physicsBody?.allowsRotation = false
             protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
                                        SKConstraint.positionY(SKRange(constantValue: 263)),
-                                       SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: UIScreen.main.bounds.width))]
+                                       SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: deviceWidth))]
             
             self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
 
@@ -120,6 +128,13 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(protagonist)
             isSetup = true
             
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                displayTV()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
+                hideTV()
+            }
+            
         })
         
         run(SKAction.repeatForever(SKAction.sequence([
@@ -128,9 +143,64 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
-    func didBegin(_ contact: SKPhysicsContact) {
-        print("CONTACT \(contact.bodyA.node?.name) / \(contact.bodyB.node?.name)")
+    func displayTV() {
+        TVScreen.size = CGSize(width: 20, height: 20)
+        TVScreen.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 220)
         
+        let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
+        croppedTV.size = TVScreen.size
+        
+        croppedFrame.maskNode = croppedTV
+        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 220)
+        
+        let portrait = SKSpriteNode(imageNamed: "Scientist 1")
+        
+        let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
+        portrait.run(portraitAnimation)
+    
+        portrait.size = CGSize(width: 140, height: 182)
+        portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
+        
+        var speakerFont = UIFont.systemFont(ofSize: 30, weight: .bold)
+        
+        if #available(iOS 16.0, *) {
+            speakerFont = UIFont.systemFont(ofSize: 30, weight: .bold, width: UIFont.Width(rawValue: 1))
+        }
+        
+        let speakerLabel = SKLabelNode(attributedText: NSAttributedString(string: "Scientist", attributes: [.font: speakerFont, .foregroundColor: UIColor.green]))
+        speakerLabel.position = CGPoint(x: 270 - (deviceWidth / 2), y: 30)
+        
+        let dialogueFont = UIFont.systemFont(ofSize: 18, weight: .regular)
+        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Ohh, nice dodge!", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
+//        dialogueLabel.position = CGPoint(x: 270 - (deviceWidth / 2), y: 0)
+        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -30), in: speakerLabel)]
+         
+        croppedFrame.addChild(portrait)
+        croppedFrame.addChild(speakerLabel)
+        croppedFrame.addChild(dialogueLabel)
+        
+        self.addChild(TVScreen)
+        self.addChild(croppedFrame)
+        
+        let firstGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.1)
+        let secondGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 200, duration: 0.2)
+        
+        TVScreen.run(SKAction.sequence([firstGrow, secondGrow]))
+        croppedFrame.maskNode!.run(SKAction.sequence([firstGrow, secondGrow]))
+    }
+    
+    func hideTV() {
+        let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
+        let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
+        
+        TVScreen.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
+        croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
+            croppedFrame.removeAllChildren()
+            croppedFrame.removeFromParent()
+        }]))
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
         if contact.bodyA.node?.name == "Beam" && contact.bodyB.node?.name == "Asteroid" {
             contact.bodyB.node?.removeFromParent()
         }
@@ -161,7 +231,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         let asteroid = Asteroid(texture: texture)
         
         asteroid.size = CGSize(width: 96, height: 80)
-        asteroid.position = CGPoint(x: random(min: 0, max: UIScreen.main.bounds.width), y: UIScreen.main.bounds.height + 100)
+        asteroid.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
         
         asteroid.physicsBody = SKPhysicsBody(rectangleOf: asteroid.size)
         asteroid.physicsBody?.isDynamic = true
@@ -172,7 +242,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         self.addChild(asteroid)
         
-        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: UIScreen.main.bounds.width), y: 0), duration: TimeInterval(random(min: 1, max: 2)))
+        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: deviceWidth), y: 0), duration: TimeInterval(random(min: 1, max: 2)))
         asteroid.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
     }
@@ -200,7 +270,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             default: break
             }
             
-            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: UIScreen.main.bounds.height - 339)).cgPath
+            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: deviceHeight - 339)).cgPath
             
             beam.path = beamPath
             beam.lineWidth = 6
@@ -210,7 +280,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             beam.physicsBody = SKPhysicsBody(edgeChainFrom: beamPath)
             beam.physicsBody?.isDynamic = true
             beam.physicsBody?.affectedByGravity = false
-//            beam.physicsBody?.allowsRotation = false
+            beam.physicsBody?.allowsRotation = false
             beam.physicsBody?.collisionBitMask = 0
             beam.physicsBody?.contactTestBitMask = 1
             beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
@@ -233,7 +303,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             run(SKAction.repeatForever(SKAction.sequence([
                 SKAction.run { [self] in
                     for particle in particles {
-                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: UIScreen.main.bounds.height - 339))
+                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: deviceHeight - 339))
                     }
                 },
                 SKAction.wait(forDuration: 0.4, withRange: 0.2)])))
