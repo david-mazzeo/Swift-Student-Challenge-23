@@ -81,6 +81,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: NSNotification.Name("released"), object: nil)
         
+        self.scaleMode = .aspectFit
         physicsWorld.contactDelegate = self
         
         for image in rocketImages {
@@ -107,8 +108,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         run(SKAction.run { [self] in
             
-            protagonist.size = CGSize(width: 86, height: 120)
-            protagonist.position = CGPoint(x: 50, y: 263)
+            protagonist.size = CGSize(width: 72, height: 120)
+            protagonist.position = CGPoint(x: 50, y: 163)
             protagonist.zRotation = 0
             
             protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
@@ -117,7 +118,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             protagonist.physicsBody?.affectedByGravity = false
             protagonist.physicsBody?.allowsRotation = false
             protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-                                       SKConstraint.positionY(SKRange(constantValue: 263)),
+                                       SKConstraint.positionY(SKRange(constantValue: 163)),
                                        SKConstraint.positionX(SKRange(lowerLimit: 0, upperLimit: deviceWidth))]
             
             self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
@@ -145,20 +146,20 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func displayTV() {
         TVScreen.size = CGSize(width: 20, height: 20)
-        TVScreen.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 220)
+        TVScreen.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 120)
         
         let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
         croppedTV.size = TVScreen.size
         
         croppedFrame.maskNode = croppedTV
-        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 220)
+        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 120)
         
         let portrait = SKSpriteNode(imageNamed: "Scientist 1")
         
         let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
         portrait.run(portraitAnimation)
     
-        portrait.size = CGSize(width: 140, height: 182)
+        portrait.size = CGSize(width: 140, height: 189)
         portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
         
         var speakerFont = UIFont.systemFont(ofSize: 30, weight: .bold)
@@ -168,16 +169,24 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         let speakerLabel = SKLabelNode(attributedText: NSAttributedString(string: "Scientist", attributes: [.font: speakerFont, .foregroundColor: UIColor.green]))
-        speakerLabel.position = CGPoint(x: 270 - (deviceWidth / 2), y: 30)
+        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2), y: 30)
+        speakerLabel.horizontalAlignmentMode = .left
         
         let dialogueFont = UIFont.systemFont(ofSize: 18, weight: .regular)
-        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Ohh, nice dodge!", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
+        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Fake text; blah, blah, blah. Things and stuff will go here, but not yet. For now, all that lies here is a string of dummy text.", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
 //        dialogueLabel.position = CGPoint(x: 270 - (deviceWidth / 2), y: 0)
-        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -30), in: speakerLabel)]
+        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
+        dialogueLabel.horizontalAlignmentMode = .left
+        dialogueLabel.verticalAlignmentMode = .top
+        dialogueLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
+        dialogueLabel.numberOfLines = 0
+        dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
          
         croppedFrame.addChild(portrait)
         croppedFrame.addChild(speakerLabel)
         croppedFrame.addChild(dialogueLabel)
+        
+        print(dialogueLabel.frame.width)
         
         self.addChild(TVScreen)
         self.addChild(croppedFrame)
@@ -270,7 +279,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             default: break
             }
             
-            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: deviceHeight - 339)).cgPath
+            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: deviceHeight - 230)).cgPath
             
             beam.path = beamPath
             beam.lineWidth = 6
@@ -292,7 +301,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             let particles = [SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode()]
             
             for particle in particles {
-                particle.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: 2, height: 1)).cgPath
+                particle.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: 2, height: 2)).cgPath
                 particle.strokeColor = colour
                 particle.lineWidth = 1
                 
