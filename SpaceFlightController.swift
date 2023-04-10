@@ -22,7 +22,7 @@ class SpaceFlightController: UIViewController {
     
     @IBAction func elementOneReleased(_ sender: Any) {
         elementTwoButton.isEnabled = true
-        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil, userInfo: ["element": 1])
+        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
     }
     
     @IBAction func elementTwoFire(_ sender: Any) {
@@ -32,14 +32,21 @@ class SpaceFlightController: UIViewController {
     
     @IBAction func elementTwoReleased(_ sender: Any) {
         elementOneButton.isEnabled = true
-        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil, userInfo: ["element": 2])
+        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
         spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         
+    }
+    
+    @objc func applicationWillResignActive(notification: NSNotification) {
+        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
+        elementOneButton.isEnabled = true
+        elementTwoButton.isEnabled = true
     }
     
 }
@@ -76,6 +83,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     let deviceHeight = UIScreen.main.bounds.height
     let deviceWidth = UIScreen.main.bounds.width
     
+    let topPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.top ?? 0
+    let bottomPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.bottom ?? 0
+    
     override func didMove(to view: SKView) {
         
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
@@ -109,7 +119,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         run(SKAction.run { [self] in
             
             protagonist.size = CGSize(width: 72, height: 120)
-            protagonist.position = CGPoint(x: 50, y: 163)
+            protagonist.position = CGPoint(x: 50, y: 163 + bottomPadding)
             protagonist.zRotation = 0
             
             protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
@@ -118,7 +128,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             protagonist.physicsBody?.affectedByGravity = false
             protagonist.physicsBody?.allowsRotation = false
             protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-                                       SKConstraint.positionY(SKRange(constantValue: 163)),
+                                       SKConstraint.positionY(SKRange(constantValue: 163 + bottomPadding)),
                                        SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: deviceWidth - 1))]
             
             self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
@@ -146,13 +156,13 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func displayTV() {
         TVScreen.size = CGSize(width: 20, height: 20)
-        TVScreen.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 120)
+        TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 120) - topPadding)
         
         let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
         croppedTV.size = TVScreen.size
         
         croppedFrame.maskNode = croppedTV
-        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: deviceHeight - 120)
+        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 120) - topPadding)
         
         let portrait = SKSpriteNode(imageNamed: "Scientist 1")
         
@@ -162,24 +172,34 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         portrait.size = CGSize(width: 140, height: 189)
         portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
         
-        var speakerFont = UIFont.systemFont(ofSize: 30, weight: .bold)
+        var speakerFontSize = CGFloat(30)
+        var dialogueFontSize = CGFloat(18)
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            speakerFontSize = 22
+            dialogueFontSize = 14
+        }
+        
+        var speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold)
         
         if #available(iOS 16.0, *) {
-            speakerFont = UIFont.systemFont(ofSize: 30, weight: .bold, width: UIFont.Width(rawValue: 1))
+            speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold, width: UIFont.Width(rawValue: 1))
         }
         
         let speakerLabel = SKLabelNode(attributedText: NSAttributedString(string: "Scientist", attributes: [.font: speakerFont, .foregroundColor: UIColor.green]))
-        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2), y: 30)
         speakerLabel.horizontalAlignmentMode = .left
         
-        let dialogueFont = UIFont.systemFont(ofSize: 18, weight: .regular)
-        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Fake text; blah, blah, blah. Things and stuff will go here, but not yet. For now, all that lies here is a string of dummy text.", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
-        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
+        let dialogueFont = UIFont.systemFont(ofSize: dialogueFontSize, weight: .regular)
+        
+        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: "Fake text; blah, blah, blah.", attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
         dialogueLabel.horizontalAlignmentMode = .left
         dialogueLabel.verticalAlignmentMode = .top
         dialogueLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
         dialogueLabel.numberOfLines = 0
         dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
+        
+        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - 60) / 2)
+        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
         
         croppedFrame.addChild(portrait)
         croppedFrame.addChild(speakerLabel)
@@ -276,7 +296,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             default: break
             }
             
-            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: deviceHeight - 230)).cgPath
+            let beamHeight = (deviceHeight - 240) - (topPadding + bottomPadding)
+            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: beamHeight)).cgPath
             
             beam.path = beamPath
             beam.lineWidth = 6
@@ -309,10 +330,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             run(SKAction.repeatForever(SKAction.sequence([
                 SKAction.run { [self] in
                     for particle in particles {
-                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: deviceHeight - 339))
+                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: beamHeight))
                     }
                 },
-                SKAction.wait(forDuration: 0.4, withRange: 0.2)])))
+                SKAction.wait(forDuration: 0.4)])))
             
         }]))
         
