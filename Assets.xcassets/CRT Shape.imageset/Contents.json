@@ -1,18 +1,21 @@
 {
   "images" : [
     {
-      "filename" : "CRT Shape.png",
+      "filename" : "CRT Shape w: Border.png",
       "idiom" : "universal",
       "resizing" : {
         "cap-insets" : {
+          "bottom" : 232,
           "left" : 593,
-          "right" : 594
+          "right" : 594,
+          "top" : 232
         },
         "center" : {
+          "height" : 1,
           "mode" : "tile",
           "width" : 1
         },
-        "mode" : "3-part-horizontal"
+        "mode" : "9-part"
       },
       "scale" : "1x"
     },

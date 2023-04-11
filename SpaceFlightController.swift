@@ -15,9 +15,16 @@ var percentElapsed = 0
 
 class SpaceFlightController: UIViewController {
     
+    let gradient = CAGradientLayer()
+    var timer = Timer()
+    
+    @IBOutlet weak var backgroundView: UIView!
     @IBOutlet weak var spriteKitView: SKView!
+    
     @IBOutlet weak var elementOneButton: UIButton!
     @IBOutlet weak var elementTwoButton: UIButton!
+    
+    @IBOutlet weak var bottomBackgroundConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var livesButton: UIButton!
     @IBOutlet weak var destroyedButton: UIButton!
@@ -46,6 +53,15 @@ class SpaceFlightController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
+        let topPadding = (window?.safeAreaInsets.top ?? 0)
+        
+        gradient.frame = CGRect(x: 0, y: -topPadding, width: view.bounds.width, height: view.bounds.height + topPadding)
+        gradient.colors = [UIColor.black.cgColor, UIColor.init(red: 0, green: 27/255, blue: 54/255, alpha: 1).cgColor]
+
+        self.view.layer.insertSublayer(gradient, at: 0)
+        
+        self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
         spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
         
         var percentElapsed = 0
@@ -59,6 +75,24 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(hitObject(_:)), name: Notification.Name("asteroidHit"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        animateBackground()
+    }
+    
+    func animateBackground() {
+        let patternHeight = -(444 * UIScreen.main.scale)
+        bottomBackgroundConstraint.constant = patternHeight
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [self] timer in
+            backgroundView.transform = CGAffineTransform(translationX: 0, y: patternHeight)
+            UIView.animate(withDuration: 30, delay: 0, options: [.curveLinear], animations: { [self] in
+                backgroundView.transform = CGAffineTransform(translationX: 0, y: 0)
+            })
+        })
+        
+        timer.fire()
     }
     
     @objc func hitObject(_ notification: Notification) {
@@ -192,6 +226,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
         
+        self.backgroundColor = .clear
+        self.view?.allowsTransparency = true
+        self.view?.backgroundColor = .clear
+        
         self.scaleMode = .aspectFit
         physicsWorld.contactDelegate = self
         
@@ -289,12 +327,14 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         var deviceOffset = CGFloat(0)
         var speakerFontSize = CGFloat(30)
         var dialogueFontSize = CGFloat(18)
-        var portraitSize = CGSize(width: 140, height: 189)
+        var offsetToCenter = CGFloat(60)
+        var portraitSize = CGSize(width: 120, height: 162)
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             deviceOffset = 50
             speakerFontSize = 22
             dialogueFontSize = 14
+            offsetToCenter = 45
             portraitSize = CGSize(width: 100, height: 135)
         }
         
@@ -333,7 +373,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         dialogueLabel.numberOfLines = 0
         dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
         
-        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2) - (deviceOffset / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - 60) / 2)
+        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2) - (deviceOffset / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - offsetToCenter) / 2)
         dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
         
         croppedFrame.addChild(portrait)
@@ -367,7 +407,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         var isEnemy = false
         var isBeam = false
         
-        if contact.bodyB.node?.name == "Asteroid" || contact.bodyB.node?.name == "Comet" {
+        if contact.bodyB.node?.name == "Asteroid" || contact.bodyB.node?.name == "Comet" || contact.bodyB.node?.name == "Black Hole" {
             isEnemy = true
         }
         
@@ -425,9 +465,12 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             
             var explosion = SKSpriteNode()
             
-            if contact.bodyB.node?.name == "Comet" {
+            switch contact.bodyB.node?.name {
+            case "Comet":
                 
                 explosion = SKSpriteNode(imageNamed: "Comet Explosion 1")
+                explosion.size = CGSize(width: 60, height: 60)
+                explosion.position = contact.contactPoint
                 
                 explosion.run(SKAction.sequence([
                     SKAction.animate(with: cometExplosionImages, timePerFrame: 1/30),
@@ -438,9 +481,13 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 }, SKAction.animate(with: cometDestroyedImages, timePerFrame: 1/30),
                     SKAction.removeFromParent()]))
                 
-            } else {
+                self.addChild(explosion)
+                
+            case "Asteroid":
                 
                 explosion = SKSpriteNode(imageNamed: "Explosion 1")
+                explosion.size = CGSize(width: 60, height: 60)
+                explosion.position = contact.contactPoint
                 
                 explosion.run(SKAction.sequence([
                     SKAction.animate(with: explosionImages, timePerFrame: 1/30),
@@ -451,12 +498,20 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
                     SKAction.removeFromParent()]))
                 
+                self.addChild(explosion)
+                
+            case "Black Hole":
+                
+                forceModifier = 0
+                
+                if forceModifier == -20 {
+                    protagonist.run(SKAction.move(to: CGPoint(x: 150, y: 163 + bottomPadding), duration: 0))
+                } else {
+                    protagonist.run(SKAction.move(to: CGPoint(x: deviceWidth - protagonist.size.width - 150, y: 163 + bottomPadding), duration: 0))
+                }
+            
+            default: break
             }
-            
-            explosion.size = CGSize(width: 60, height: 60)
-            explosion.position = contact.contactPoint
-            
-            self.addChild(explosion)
             
             livesRemaining -= 1
             NotificationCenter.default.post(Notification(name: Notification.Name("lifeModified")))

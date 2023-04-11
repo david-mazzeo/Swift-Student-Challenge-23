@@ -116,6 +116,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DKl-bm-huN">
+                                <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
                             <skView contentMode="scaleToFill" preferredFramesPerSecond="60" translatesAutoresizingMaskIntoConstraints="NO" id="5h4-MU-TuJ">
                                 <rect key="frame" x="0.0" y="-100" width="430" height="1132"/>
                             </skView>
@@ -192,6 +196,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="wft-le-i9C" firstAttribute="leading" secondItem="Ojw-6g-8zr" secondAttribute="trailing" constant="15" id="1zL-iF-MQB"/>
+                            <constraint firstAttribute="bottom" secondItem="DKl-bm-huN" secondAttribute="bottom" id="3fy-as-OQy"/>
                             <constraint firstItem="jP6-Qz-5Kv" firstAttribute="trailing" secondItem="edm-lE-ZMZ" secondAttribute="trailing" constant="20" id="3u8-Vo-OTm"/>
                             <constraint firstItem="lbc-Js-FKN" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" constant="20" id="DBi-ey-NDq"/>
                             <constraint firstItem="jP6-Qz-5Kv" firstAttribute="trailing" secondItem="wft-le-i9C" secondAttribute="trailing" constant="20" id="Ic6-Gm-7rt"/>
@@ -201,7 +206,10 @@
                             <constraint firstItem="5h4-MU-TuJ" firstAttribute="trailing" secondItem="jP6-Qz-5Kv" secondAttribute="trailing" id="QAt-PE-6TF"/>
                             <constraint firstItem="Up1-Iv-hs4" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="SDw-aS-C0H"/>
                             <constraint firstItem="jP6-Qz-5Kv" firstAttribute="bottom" secondItem="lbc-Js-FKN" secondAttribute="bottom" constant="16" id="SkU-yX-TVA"/>
+                            <constraint firstItem="DKl-bm-huN" firstAttribute="trailing" secondItem="jP6-Qz-5Kv" secondAttribute="trailing" id="VBG-KL-tvL"/>
+                            <constraint firstItem="DKl-bm-huN" firstAttribute="top" secondItem="grN-WA-gES" secondAttribute="top" id="W0E-ip-zO0"/>
                             <constraint firstItem="Ojw-6g-8zr" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="XJP-A2-FOj"/>
+                            <constraint firstItem="DKl-bm-huN" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" id="a6I-z6-bZP"/>
                             <constraint firstItem="Up1-Iv-hs4" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" constant="20" id="aC2-2h-mvP"/>
                             <constraint firstItem="wft-le-i9C" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="apZ-39-Zbi"/>
                             <constraint firstItem="Ojw-6g-8zr" firstAttribute="leading" secondItem="Up1-Iv-hs4" secondAttribute="trailing" constant="15" id="cZ4-o3-h0B"/>
@@ -214,6 +222,8 @@
                     </view>
                     <navigationItem key="navigationItem" id="TdS-EU-0gC"/>
                     <connections>
+                        <outlet property="backgroundView" destination="DKl-bm-huN" id="WqS-Cp-cJw"/>
+                        <outlet property="bottomBackgroundConstraint" destination="3fy-as-OQy" id="3go-5U-klm"/>
                         <outlet property="destroyedButton" destination="Ojw-6g-8zr" id="IYa-cx-OFC"/>
                         <outlet property="elapsedButton" destination="wft-le-i9C" id="T5M-PG-4Zy"/>
                         <outlet property="elementOneButton" destination="lbc-Js-FKN" id="41M-nI-71o"/>
