@@ -151,15 +151,58 @@
                                     <action selector="elementTwoReleased:" destination="HL5-gg-izn" eventType="touchDragExit" id="Zb1-Uq-CRE"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wft-le-i9C">
+                                <rect key="frame" x="290" y="59" width="120" height="46"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="46" id="iEN-e8-0s4"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="0%" subtitle="complete" titlePadding="-3" cornerStyle="capsule" titleAlignment="center">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <fontDescription key="subtitleFontDescription" type="system" pointSize="13"/>
+                                </buttonConfiguration>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ojw-6g-8zr">
+                                <rect key="frame" x="155" y="59" width="120" height="46"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="46" id="QHm-sC-ZpU"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="0" subtitle="destroyed" titlePadding="-3" cornerStyle="capsule" titleAlignment="center">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Up1-Iv-hs4">
+                                <rect key="frame" x="20" y="59" width="120" height="46"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="46" id="Hs2-ar-NgB"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="3" subtitle="lives left" titlePadding="-2" cornerStyle="capsule" titleAlignment="center">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="baseForegroundColor" systemColor="systemRedColor"/>
+                                    <color key="baseBackgroundColor" systemColor="systemRedColor"/>
+                                </buttonConfiguration>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="jP6-Qz-5Kv"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="wft-le-i9C" firstAttribute="leading" secondItem="Ojw-6g-8zr" secondAttribute="trailing" constant="15" id="1zL-iF-MQB"/>
                             <constraint firstItem="jP6-Qz-5Kv" firstAttribute="trailing" secondItem="edm-lE-ZMZ" secondAttribute="trailing" constant="20" id="3u8-Vo-OTm"/>
                             <constraint firstItem="lbc-Js-FKN" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" constant="20" id="DBi-ey-NDq"/>
+                            <constraint firstItem="jP6-Qz-5Kv" firstAttribute="trailing" secondItem="wft-le-i9C" secondAttribute="trailing" constant="20" id="Ic6-Gm-7rt"/>
                             <constraint firstAttribute="bottom" secondItem="5h4-MU-TuJ" secondAttribute="bottom" constant="-100" id="KGo-Dh-HVm"/>
+                            <constraint firstItem="Ojw-6g-8zr" firstAttribute="width" secondItem="Up1-Iv-hs4" secondAttribute="width" id="KUx-55-Mxg"/>
+                            <constraint firstItem="wft-le-i9C" firstAttribute="width" secondItem="Up1-Iv-hs4" secondAttribute="width" id="PK1-Lw-OFg"/>
                             <constraint firstItem="5h4-MU-TuJ" firstAttribute="trailing" secondItem="jP6-Qz-5Kv" secondAttribute="trailing" id="QAt-PE-6TF"/>
+                            <constraint firstItem="Up1-Iv-hs4" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="SDw-aS-C0H"/>
                             <constraint firstItem="jP6-Qz-5Kv" firstAttribute="bottom" secondItem="lbc-Js-FKN" secondAttribute="bottom" constant="16" id="SkU-yX-TVA"/>
+                            <constraint firstItem="Ojw-6g-8zr" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="XJP-A2-FOj"/>
+                            <constraint firstItem="Up1-Iv-hs4" firstAttribute="leading" secondItem="jP6-Qz-5Kv" secondAttribute="leading" constant="20" id="aC2-2h-mvP"/>
+                            <constraint firstItem="wft-le-i9C" firstAttribute="top" secondItem="jP6-Qz-5Kv" secondAttribute="top" id="apZ-39-Zbi"/>
+                            <constraint firstItem="Ojw-6g-8zr" firstAttribute="leading" secondItem="Up1-Iv-hs4" secondAttribute="trailing" constant="15" id="cZ4-o3-h0B"/>
                             <constraint firstItem="5h4-MU-TuJ" firstAttribute="top" secondItem="grN-WA-gES" secondAttribute="top" constant="-100" id="dEs-MH-UqU"/>
                             <constraint firstItem="edm-lE-ZMZ" firstAttribute="width" secondItem="lbc-Js-FKN" secondAttribute="width" id="eCY-pG-6tU"/>
                             <constraint firstItem="edm-lE-ZMZ" firstAttribute="leading" secondItem="lbc-Js-FKN" secondAttribute="trailing" constant="10" id="mbO-yS-FJm"/>
@@ -169,8 +212,11 @@
                     </view>
                     <navigationItem key="navigationItem" id="TdS-EU-0gC"/>
                     <connections>
+                        <outlet property="destroyedButton" destination="Ojw-6g-8zr" id="IYa-cx-OFC"/>
+                        <outlet property="elapsedButton" destination="wft-le-i9C" id="T5M-PG-4Zy"/>
                         <outlet property="elementOneButton" destination="lbc-Js-FKN" id="41M-nI-71o"/>
                         <outlet property="elementTwoButton" destination="edm-lE-ZMZ" id="iNQ-f1-ptJ"/>
+                        <outlet property="livesButton" destination="Up1-Iv-hs4" id="MOs-fI-54F"/>
                         <outlet property="spriteKitView" destination="5h4-MU-TuJ" id="xwK-JE-Bsi"/>
                     </connections>
                 </viewController>
@@ -202,6 +248,9 @@
         </systemColor>
         <systemColor name="systemGreenColor">
             <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemTealColor">
             <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -9,38 +9,64 @@ import UIKit
 import SpriteKit
 import CoreMotion
 
+var objectsHit = 0
+var livesRemaining = 3
+var percentElapsed = 0
+
 class SpaceFlightController: UIViewController {
     
     @IBOutlet weak var spriteKitView: SKView!
     @IBOutlet weak var elementOneButton: UIButton!
     @IBOutlet weak var elementTwoButton: UIButton!
     
+    @IBOutlet weak var livesButton: UIButton!
+    @IBOutlet weak var destroyedButton: UIButton!
+    @IBOutlet weak var elapsedButton: UIButton!
+    
     @IBAction func elementOneFire(_ sender: Any) {
         elementTwoButton.isEnabled = false
-        NotificationCenter.default.post(name: NSNotification.Name("fire"), object: nil, userInfo: ["element": 1])
+        NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 1])
     }
     
     @IBAction func elementOneReleased(_ sender: Any) {
         elementTwoButton.isEnabled = true
-        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
     
     @IBAction func elementTwoFire(_ sender: Any) {
         elementOneButton.isEnabled = false
-        NotificationCenter.default.post(name: NSNotification.Name("fire"), object: nil, userInfo: ["element": 2])
+        NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 2])
     }
     
     @IBAction func elementTwoReleased(_ sender: Any) {
         elementOneButton.isEnabled = true
-        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
-        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         
+        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        
+        var percentElapsed = 0
+        
+        Timer.scheduledTimer(withTimeInterval: 10/100, repeats: true, block: { [self] timer in
+            percentElapsed += 1
+            elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
+        })
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(hitObject(_:)), name: Notification.Name("asteroidHit"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
+        
+    }
+    
+    @objc func hitObject(_ notification: Notification) {
+        destroyedButton.configuration?.attributedTitle = AttributedString(String(objectsHit), attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
+    }
+    
+    @objc func lifeLost(_ notification: Notification) {
+        livesButton.configuration?.attributedTitle = AttributedString(String(livesRemaining), attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
     }
     
     @objc func applicationWillResignActive(notification: NSNotification) {
@@ -61,6 +87,15 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                         SKTexture(image: UIImage(named: "Rocket 5")!),
                         SKTexture(image: UIImage(named: "Rocket 6")!)]
     
+    let cometImages = [SKTexture(image: UIImage(named: "Comet 1")!),
+                       SKTexture(image: UIImage(named: "Comet 2")!),
+                       SKTexture(image: UIImage(named: "Comet 3")!),
+                       SKTexture(image: UIImage(named: "Comet 4")!),
+                       SKTexture(image: UIImage(named: "Comet 5")!),
+                       SKTexture(image: UIImage(named: "Comet 6")!),
+                       SKTexture(image: UIImage(named: "Comet 7")!),
+                       SKTexture(image: UIImage(named: "Comet 8")!)]
+    
     let greenChargeUpImages = [SKTexture(image: UIImage(named: "Green Beam 1")!),
                                SKTexture(image: UIImage(named: "Green Beam 2")!),
                                SKTexture(image: UIImage(named: "Green Beam 3")!),
@@ -71,8 +106,64 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     let scientistImages = [SKTexture(image: UIImage(named: "Scientist 1")!),
                            SKTexture(image: UIImage(named: "Scientist 2")!)]
     
+    let asteroidDestroyedImages = [SKTexture(image: UIImage(named: "Asteroid Hit 1")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 2")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 3")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 4")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 5")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 6")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 7")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 8")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 9")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 10")!),
+                                   SKTexture(image: UIImage(named: "Asteroid Hit 11")!)]
+    
+    let cometDestroyedImages = [SKTexture(image: UIImage(named: "Comet Hit 1")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 2")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 3")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 4")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 5")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 6")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 7")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 8")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 9")!),
+                                SKTexture(image: UIImage(named: "Comet Hit 10")!)]
+    
+    let explosionImages = [SKTexture(image: UIImage(named: "Explosion 1")!),
+                           SKTexture(image: UIImage(named: "Explosion 2")!),
+                           SKTexture(image: UIImage(named: "Explosion 3")!),
+                           SKTexture(image: UIImage(named: "Explosion 4")!),
+                           SKTexture(image: UIImage(named: "Explosion 5")!),
+                           SKTexture(image: UIImage(named: "Explosion 6")!),
+                           SKTexture(image: UIImage(named: "Explosion 7")!),
+                           SKTexture(image: UIImage(named: "Explosion 8")!),
+                           SKTexture(image: UIImage(named: "Explosion 9")!),
+                           SKTexture(image: UIImage(named: "Explosion 10")!),
+                           SKTexture(image: UIImage(named: "Explosion 11")!),
+                           SKTexture(image: UIImage(named: "Explosion 12")!),
+                           SKTexture(image: UIImage(named: "Explosion 13")!),
+                           SKTexture(image: UIImage(named: "Explosion 14")!),
+                           SKTexture(image: UIImage(named: "Explosion 15")!)]
+    
+    let cometExplosionImages = [SKTexture(image: UIImage(named: "Comet Explosion 1")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 2")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 3")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 4")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 5")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 6")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 7")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 8")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 9")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 10")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 11")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 12")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 13")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 14")!),
+                                SKTexture(image: UIImage(named: "Comet Explosion 15")!)]
+    
     var isSetup = false
     var isBeamActive = false
+    var healthEvents = true
     let motionEngine = CMMotionManager()
     
     let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
@@ -88,8 +179,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
         
-        NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: NSNotification.Name("fire"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: NSNotification.Name("released"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
         
         self.scaleMode = .aspectFit
         physicsWorld.contactDelegate = self
@@ -103,6 +194,26 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         for image in scientistImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in asteroidDestroyedImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in cometImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in explosionImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in cometExplosionImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in cometImages {
             image.filteringMode = .nearest
         }
         
@@ -121,12 +232,14 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             protagonist.size = CGSize(width: 72, height: 120)
             protagonist.position = CGPoint(x: 50, y: 163 + bottomPadding)
             protagonist.zRotation = 0
+            protagonist.name = "Rocket"
             
             protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
             protagonist.physicsBody?.isDynamic = true
             protagonist.physicsBody?.mass = 0.02
             protagonist.physicsBody?.affectedByGravity = false
             protagonist.physicsBody?.allowsRotation = false
+            protagonist.physicsBody?.contactTestBitMask = 1
             protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
                                        SKConstraint.positionY(SKRange(constantValue: 163 + bottomPadding)),
                                        SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: deviceWidth - 1))]
@@ -149,36 +262,40 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         })
         
         run(SKAction.repeatForever(SKAction.sequence([
-            SKAction.run(addAsteroidOne),
+            SKAction.run(pickObject),
             SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
         
     }
     
     func displayTV() {
+        var deviceOffset = CGFloat(0)
+        var speakerFontSize = CGFloat(30)
+        var dialogueFontSize = CGFloat(18)
+        var portraitSize = CGSize(width: 140, height: 189)
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            deviceOffset = 50
+            speakerFontSize = 22
+            dialogueFontSize = 14
+            portraitSize = CGSize(width: 100, height: 135)
+        }
+        
         TVScreen.size = CGSize(width: 20, height: 20)
-        TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 120) - topPadding)
+        TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
         
         let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
         croppedTV.size = TVScreen.size
         
         croppedFrame.maskNode = croppedTV
-        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 120) - topPadding)
+        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
         
         let portrait = SKSpriteNode(imageNamed: "Scientist 1")
         
         let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
         portrait.run(portraitAnimation)
     
-        portrait.size = CGSize(width: 140, height: 189)
+        portrait.size = portraitSize
         portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
-        
-        var speakerFontSize = CGFloat(30)
-        var dialogueFontSize = CGFloat(18)
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            speakerFontSize = 22
-            dialogueFontSize = 14
-        }
         
         var speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold)
         
@@ -198,7 +315,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         dialogueLabel.numberOfLines = 0
         dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
         
-        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - 60) / 2)
+        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2) - (deviceOffset / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - 60) / 2)
         dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: -10), in: speakerLabel)]
         
         croppedFrame.addChild(portrait)
@@ -209,7 +326,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(croppedFrame)
         
         let firstGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.1)
-        let secondGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 200, duration: 0.2)
+        let secondGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 200 - deviceOffset, duration: 0.2)
         
         TVScreen.run(SKAction.sequence([firstGrow, secondGrow]))
         croppedFrame.maskNode!.run(SKAction.sequence([firstGrow, secondGrow]))
@@ -227,9 +344,100 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        if contact.bodyA.node?.name == "Beam" && contact.bodyB.node?.name == "Asteroid" {
-            contact.bodyB.node?.removeFromParent()
+        
+        var isEnemy = false
+        if contact.bodyB.node?.name == "Asteroid" || contact.bodyB.node?.name == "Comet" {
+            isEnemy = true
         }
+        
+        if contact.bodyA.node?.name == "Beam" && contact.bodyB.node?.name == "Asteroid" {
+            
+            objectsHit += 1
+            NotificationCenter.default.post(Notification(name: Notification.Name("asteroidHit")))
+            
+            if objectsHit.isMultiple(of: 10) {
+                livesRemaining += 1
+                NotificationCenter.default.post(Notification(name: Notification.Name("lifeModified")))
+            }
+            
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                let generator = UIImpactFeedbackGenerator(style: .rigid)
+                generator.impactOccurred()
+            }
+            
+            contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
+                contact.bodyB.node?.physicsBody = nil
+            }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
+                SKAction.removeFromParent()]))
+            
+        }
+        
+        if contact.bodyA.node?.name == "Rocket" && isEnemy && healthEvents {
+            
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                let tapticFeedback = UINotificationFeedbackGenerator()
+                tapticFeedback.notificationOccurred(.error)
+            }
+            
+            var explosion = SKSpriteNode()
+            
+            if contact.bodyB.node?.name == "Comet" {
+                
+                explosion = SKSpriteNode(imageNamed: "Comet Explosion 1")
+                
+                explosion.run(SKAction.sequence([
+                    SKAction.animate(with: cometExplosionImages, timePerFrame: 1/30),
+                    SKAction.removeFromParent()]))
+                
+                contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
+                    contact.bodyB.node?.physicsBody = nil
+                }, SKAction.animate(with: cometDestroyedImages, timePerFrame: 1/30),
+                    SKAction.removeFromParent()]))
+                
+            } else {
+                
+                explosion = SKSpriteNode(imageNamed: "Explosion 1")
+                
+                explosion.run(SKAction.sequence([
+                    SKAction.animate(with: explosionImages, timePerFrame: 1/30),
+                    SKAction.removeFromParent()]))
+                
+                contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
+                    contact.bodyB.node?.physicsBody = nil
+                }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
+                    SKAction.removeFromParent()]))
+                
+            }
+            
+            explosion.size = CGSize(width: 60, height: 60)
+            explosion.position = contact.contactPoint
+            
+            self.addChild(explosion)
+            
+            livesRemaining -= 1
+            NotificationCenter.default.post(Notification(name: Notification.Name("lifeModified")))
+            
+            healthEvents = false
+            var timerCount = 0
+            
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [self] timer in
+                if timerCount == 10 {
+                    timer.invalidate()
+                    protagonist.isHidden = false
+                    healthEvents = true
+                } else {
+                    if protagonist.isHidden {
+                        protagonist.isHidden = false
+                    } else {
+                        protagonist.isHidden = true
+                    }
+                    
+                    timerCount += 1
+                }
+            })
+        }
+        
+//        print("\(contact.bodyA.node?.name) / \(contact.bodyB.node?.name)")
     }
     
     func random() -> CGFloat {
@@ -250,16 +458,26 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         return random() * (max - min) + min
     }
     
-    func addAsteroidOne() {
+    func pickObject() {
+        let randomNumber = Int.random(in: 0..<2)
+        print(randomNumber)
+        if randomNumber == 0 {
+            addAsteroid()
+        } else {
+            addComet()
+        }
+    }
+    
+    func addAsteroid() {
         let texture = SKTexture(image: UIImage(named: "Asteroid 1")!)
         texture.filteringMode = .nearest
         
         let asteroid = Asteroid(texture: texture)
         
-        asteroid.size = CGSize(width: 96, height: 80)
+        asteroid.size = CGSize(width: 120, height: 104)
         asteroid.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
         
-        asteroid.physicsBody = SKPhysicsBody(rectangleOf: asteroid.size)
+        asteroid.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 96, height: 80))
         asteroid.physicsBody?.isDynamic = true
         asteroid.physicsBody?.affectedByGravity = false
         asteroid.physicsBody?.collisionBitMask = 0
@@ -270,6 +488,30 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: deviceWidth), y: 0), duration: TimeInterval(random(min: 1, max: 2)))
         asteroid.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
+        
+    }
+    
+    func addComet() {
+        let texture = SKTexture(image: UIImage(named: "Comet 1")!)
+        texture.filteringMode = .nearest
+        
+        let comet = Comet(texture: texture)
+        
+        comet.size = CGSize(width: 68, height: 128)
+        comet.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
+        
+        comet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 96, height: 80))
+        comet.physicsBody?.isDynamic = true
+        comet.physicsBody?.affectedByGravity = false
+        comet.physicsBody?.collisionBitMask = 0
+        comet.name = "Comet"
+        comet.physicsBody?.contactTestBitMask = 1
+        
+        self.addChild(comet)
+        
+        let actionMove = SKAction.move(to: CGPoint(x: comet.position.x, y: 0), duration: TimeInterval(random(min: 1, max: 2)))
+        comet.run(SKAction.repeatForever(SKAction.animate(with: cometImages, timePerFrame: 0.1)))
+        comet.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
     }
     
@@ -352,5 +594,9 @@ class Rocket: SKSpriteNode {
 }
 
 class Asteroid: SKSpriteNode {
+    
+}
+
+class Comet: SKSpriteNode {
     
 }
