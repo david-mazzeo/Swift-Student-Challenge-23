@@ -96,6 +96,14 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                        SKTexture(image: UIImage(named: "Comet 7")!),
                        SKTexture(image: UIImage(named: "Comet 8")!)]
     
+    let blackHoleImages = [SKTexture(image: UIImage(named: "Black Hole 1")!),
+                           SKTexture(image: UIImage(named: "Black Hole 2")!),
+                           SKTexture(image: UIImage(named: "Black Hole 3")!),
+                           SKTexture(image: UIImage(named: "Black Hole 4")!),
+                           SKTexture(image: UIImage(named: "Black Hole 5")!),
+                           SKTexture(image: UIImage(named: "Black Hole 6")!),
+                           SKTexture(image: UIImage(named: "Black Hole 7")!)]
+    
     let greenChargeUpImages = [SKTexture(image: UIImage(named: "Green Beam 1")!),
                                SKTexture(image: UIImage(named: "Green Beam 2")!),
                                SKTexture(image: UIImage(named: "Green Beam 3")!),
@@ -163,7 +171,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     var isSetup = false
     var isBeamActive = false
+    var isAlreadyBlackHole = false
     var healthEvents = true
+    var forceModifier = Double(0)
     let motionEngine = CMMotionManager()
     
     let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
@@ -221,13 +231,17 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             image.filteringMode = .nearest
         }
         
+        for image in blackHoleImages {
+            image.filteringMode = .nearest
+        }
+        
         motionEngine.accelerometerUpdateInterval = 1/60
         motionEngine.gyroUpdateInterval = 1/60
         
         motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
             if isSetup {
-                protagonist.physicsBody!.applyForce(CGVector(dx: 40 * xAxis, dy: 0))
+                protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + forceModifier, dy: 0))
             }
         })
         
@@ -489,12 +503,23 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func pickObject() {
-        let randomNumber = Int.random(in: 0..<2)
-        print(randomNumber)
-        if randomNumber == 0 {
-            addAsteroid()
+        var randomNumber = 0
+        
+        if isAlreadyBlackHole {
+            randomNumber = Int.random(in: 0..<11)
         } else {
+            randomNumber = Int.random(in: 0..<12)
+        }
+        
+        if 0...5 ~= randomNumber {
+            addAsteroid()
+            print("asteroid \(randomNumber)")
+        } else if 5...10 ~= randomNumber {
             addComet()
+            print("comet \(randomNumber)")
+        } else {
+            addBlackHole()
+            print("black hole \(randomNumber)")
         }
     }
     
@@ -505,18 +530,18 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         let asteroid = Asteroid(texture: texture)
         
         asteroid.size = CGSize(width: 120, height: 104)
-        asteroid.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
+        asteroid.position = CGPoint(x: random(min: 0 + (asteroid.size.width / 2), max: deviceWidth - (asteroid.size.width / 2)), y: deviceHeight + 100)
         
         asteroid.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 96, height: 80))
         asteroid.physicsBody?.isDynamic = true
         asteroid.physicsBody?.affectedByGravity = false
         asteroid.physicsBody?.collisionBitMask = 0
-        asteroid.name = "Asteroid"
         asteroid.physicsBody?.contactTestBitMask = 1
+        asteroid.name = "Asteroid"
         
         self.addChild(asteroid)
         
-        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: deviceWidth), y: 0), duration: TimeInterval(random(min: 2, max: 3)))
+        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0 + (asteroid.size.width / 2), max: deviceWidth - (asteroid.size.width / 2)), y: 0), duration: TimeInterval(random(min: 2, max: 3)))
         asteroid.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
     }
@@ -528,14 +553,14 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         let comet = Comet(texture: texture)
         
         comet.size = CGSize(width: 68, height: 128)
-        comet.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
+        comet.position = CGPoint(x: random(min: 0 + (comet.size.width / 2), max: deviceWidth - (comet.size.width / 2)), y: deviceHeight + 100)
         
         comet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 68, height: 128))
         comet.physicsBody?.isDynamic = true
         comet.physicsBody?.affectedByGravity = false
         comet.physicsBody?.collisionBitMask = 0
-        comet.name = "Comet"
         comet.physicsBody?.contactTestBitMask = 1
+        comet.name = "Comet"
         
         self.addChild(comet)
         
@@ -543,6 +568,42 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         comet.run(SKAction.repeatForever(SKAction.animate(with: cometImages, timePerFrame: 0.1)))
         comet.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
+    }
+    
+    func addBlackHole() {
+        isAlreadyBlackHole = true
+        let texture = SKTexture(image: UIImage(named: "Black Hole 1")!)
+        texture.filteringMode = .nearest
+        
+        let blackHole = BlackHole(texture: texture)
+        let xPosition = randomBesides(min: 0 + (blackHole.size.width / 2), max: deviceWidth - (blackHole.size.width / 2), besidesMin: 100, besidesMax: deviceWidth - 100)
+        
+        if xPosition <= 100 {
+            forceModifier = -10
+        } else {
+            forceModifier = 10
+        }
+        
+        blackHole.size = CGSize(width: 116, height: 76)
+        blackHole.position = CGPoint(x: xPosition, y: deviceHeight + 100)
+        
+        blackHole.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 52, height: 52))
+        blackHole.physicsBody?.isDynamic = true
+        blackHole.physicsBody?.affectedByGravity = false
+        blackHole.physicsBody?.collisionBitMask = 0
+        blackHole.physicsBody?.contactTestBitMask = 1
+        blackHole.name = "Black Hole"
+        
+        self.addChild(blackHole)
+        
+        let actionMove = SKAction.move(to: CGPoint(x: blackHole.position.x, y: 0), duration: TimeInterval(random(min: 3, max: 4)))
+        
+        blackHole.run(SKAction.repeatForever(SKAction.animate(with: blackHoleImages, timePerFrame: 0.1)))
+        
+        blackHole.run(SKAction.sequence([actionMove, SKAction.removeFromParent(), SKAction.run { [self] in
+            forceModifier = 0
+            isAlreadyBlackHole = false
+        }]))
     }
     
     @objc func fireLaser(_ notification: Notification) {
@@ -631,5 +692,9 @@ class Asteroid: SKSpriteNode {
 }
 
 class Comet: SKSpriteNode {
+    
+}
+
+class BlackHole: SKSpriteNode {
     
 }
