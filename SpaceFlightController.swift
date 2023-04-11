@@ -201,6 +201,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             image.filteringMode = .nearest
         }
         
+        for image in cometDestroyedImages {
+            image.filteringMode = .nearest
+        }
+        
         for image in cometImages {
             image.filteringMode = .nearest
         }
@@ -345,12 +349,27 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func didBegin(_ contact: SKPhysicsContact) {
         
+        var isCompatible = false
         var isEnemy = false
+        var isBeam = false
+        
         if contact.bodyB.node?.name == "Asteroid" || contact.bodyB.node?.name == "Comet" {
             isEnemy = true
         }
         
+        if contact.bodyA.node?.name == "Beam" || contact.bodyA.node?.name == "BeamTwo" {
+            isBeam = true
+        }
+        
         if contact.bodyA.node?.name == "Beam" && contact.bodyB.node?.name == "Asteroid" {
+            isCompatible = true
+        }
+        
+        if contact.bodyA.node?.name == "BeamTwo" && contact.bodyB.node?.name == "Comet" {
+            isCompatible = true
+        }
+        
+        if isBeam && isEnemy && isCompatible {
             
             objectsHit += 1
             NotificationCenter.default.post(Notification(name: Notification.Name("asteroidHit")))
@@ -365,10 +384,21 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 generator.impactOccurred()
             }
             
-            contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
-                contact.bodyB.node?.physicsBody = nil
-            }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
-                SKAction.removeFromParent()]))
+            if contact.bodyB.node?.name == "Asteroid" {
+                
+                contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
+                    contact.bodyB.node?.physicsBody = nil
+                }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
+                    SKAction.removeFromParent()]))
+                
+            } else {
+                
+                contact.bodyB.node?.run(SKAction.sequence([SKAction.run {
+                    contact.bodyB.node?.physicsBody = nil
+                }, SKAction.animate(with: cometDestroyedImages, timePerFrame: 1/33),
+                    SKAction.removeFromParent()]))
+                
+            }
             
         }
         
@@ -486,7 +516,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         self.addChild(asteroid)
         
-        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: deviceWidth), y: 0), duration: TimeInterval(random(min: 1, max: 2)))
+        let actionMove = SKAction.move(to: CGPoint(x: random(min: 0, max: deviceWidth), y: 0), duration: TimeInterval(random(min: 2, max: 3)))
         asteroid.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
     }
@@ -500,7 +530,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         comet.size = CGSize(width: 68, height: 128)
         comet.position = CGPoint(x: random(min: 0, max: deviceWidth), y: deviceHeight + 100)
         
-        comet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 96, height: 80))
+        comet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 68, height: 128))
         comet.physicsBody?.isDynamic = true
         comet.physicsBody?.affectedByGravity = false
         comet.physicsBody?.collisionBitMask = 0
@@ -509,7 +539,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         self.addChild(comet)
         
-        let actionMove = SKAction.move(to: CGPoint(x: comet.position.x, y: 0), duration: TimeInterval(random(min: 1, max: 2)))
+        let actionMove = SKAction.move(to: CGPoint(x: comet.position.x, y: 0), duration: TimeInterval(random(min: 2, max: 3)))
         comet.run(SKAction.repeatForever(SKAction.animate(with: cometImages, timePerFrame: 0.1)))
         comet.run(SKAction.sequence([actionMove, SKAction.removeFromParent()]))
         
@@ -523,18 +553,21 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         protagonist.addChild(chargeUpView)
         
-        let chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/12)
+        let chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/24)
         
         chargeUpView.run(SKAction.sequence([chargeUpAnimation, SKAction.removeFromParent(), SKAction.run { [self] in
             
             var colour = UIColor()
+            var name = "Beam"
             protagonist.addChild(beam)
             
             let element = notification.userInfo?["element"] as? Int
             
             switch element {
             case 1: colour = .green
-            case 2: colour = .blue
+                    name = "Beam"
+            case 2: colour = .orange
+                    name = "BeamTwo"
             default: break
             }
             
@@ -545,7 +578,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             beam.lineWidth = 6
             beam.strokeColor = colour
             
-            beam.name = "Beam"
+            beam.name = name
             beam.physicsBody = SKPhysicsBody(edgeChainFrom: beamPath)
             beam.physicsBody?.isDynamic = true
             beam.physicsBody?.affectedByGravity = false

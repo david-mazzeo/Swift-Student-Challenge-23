@@ -125,7 +125,7 @@
                                     <constraint firstAttribute="height" constant="57" id="hOm-aq-6aG"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Hydrochloric Acid" cornerStyle="capsule">
+                                <buttonConfiguration key="configuration" style="tinted" title="Hydrochloric Acid" cornerStyle="capsule" titleAlignment="center">
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
                                     <color key="baseForegroundColor" systemColor="systemGreenColor"/>
                                     <color key="baseBackgroundColor" systemColor="systemGreenColor"/>
@@ -142,8 +142,10 @@
                                     <constraint firstAttribute="height" constant="57" id="RBJ-b2-f7f"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="[]" cornerStyle="capsule">
+                                <buttonConfiguration key="configuration" style="tinted" title="Thermal Energy" cornerStyle="capsule">
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                    <color key="baseForegroundColor" systemColor="systemOrangeColor"/>
+                                    <color key="baseBackgroundColor" systemColor="systemOrangeColor"/>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="elementTwoFire:" destination="HL5-gg-izn" eventType="touchDown" id="5kH-uO-ZKc"/>
@@ -248,6 +250,9 @@
         </systemColor>
         <systemColor name="systemGreenColor">
             <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemOrangeColor">
+            <color red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
             <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
