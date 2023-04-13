@@ -1,0 +1,44 @@
+{
+  "images" : [
+    {
+      "filename" : "Tall CRT Shape 1.png",
+      "idiom" : "universal",
+      "resizing" : {
+        "cap-insets" : {
+          "bottom" : 800,
+          "left" : 593,
+          "right" : 594,
+          "top" : 800
+        },
+        "center" : {
+          "height" : 1,
+          "mode" : "tile",
+          "width" : 1
+        },
+        "mode" : "9-part"
+      }
+    },
+    {
+      "filename" : "Tall CRT Shape.png",
+      "idiom" : "ipad",
+      "resizing" : {
+        "cap-insets" : {
+          "bottom" : 700,
+          "left" : 593,
+          "right" : 594,
+          "top" : 700
+        },
+        "center" : {
+          "height" : 1,
+          "mode" : "tile",
+          "width" : 1
+        },
+        "mode" : "9-part"
+      }
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

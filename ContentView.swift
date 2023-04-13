@@ -11,28 +11,124 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
     var timer = Timer()
+    
     @IBOutlet weak var starView: UIView!
+    
+    @IBOutlet weak var goButton: UIButton!
+    @IBOutlet weak var aboutButton: UIButton!
     
     @IBOutlet weak var cloudView: UIView!
     @IBOutlet weak var cloudOne: UIImageView!
     @IBOutlet weak var cloudTwo: UIImageView!
     
+    @IBOutlet weak var tvScreen: UIImageView!
+    @IBOutlet weak var dialogueView: UITextView!
+    
+    @IBOutlet weak var textWidthConstraint: NSLayoutConstraint!
+    @IBOutlet weak var textHeightConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var continueButton: UIButton!
+    
+    var currentDialogueStage = 0
+    
     @IBAction func go(_ sender: Any) {
-        view.layer.removeAllAnimations()
-        cloudView.layer.removeAllAnimations()
-        timer.invalidate()
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true, completion: nil)
+        UIView.animate(withDuration: 1, animations: { [self] in
+            goButton.alpha = 0
+            aboutButton.alpha = 0
+        }, completion: { [self] (finished: Bool) in
+            
+            presentTV {
+                
+                UIView.animate(withDuration: 0.2, animations: { [self] in
+                    dialogueView.alpha = 1
+                    continueButton.alpha = 1
+                }, completion: { [self] (finished: Bool) in
+                    dialogueView.characterByCharacter(string: """
+                    You are a citizen of the planet Lunaro, home to a colony of humans who settled here recently. Although previously thriving, recent climate pollution — manifesting as a cloud of gases encasing the planet, blocking solar energy — has thrown the lives of millions into jeopardy.
+                    """)
+                })
+                
+            }
+            
+        })
+
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+//        vc.modalPresentationStyle = .fullScreen
+//        self.present(vc, animated: true, completion: nil)
+        
+//        view.layer.removeAllAnimations()
+//        cloudView.layer.removeAllAnimations()
+//        timer.invalidate()
+        
+    }
+    
+    func presentTV(complete: @escaping () -> Void) {
+        
+        let widthScale = (self.view.frame.width - 40) / 20
+        let heightScale = (self.view.frame.height - 200) / 20
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            textWidthConstraint.constant = (widthScale * 20) - 170
+            textHeightConstraint.constant = (heightScale * 20) - 300
+        } else {
+            textWidthConstraint.constant = (widthScale * 20) - 80
+            textHeightConstraint.constant = (heightScale * 20) - 200
+        }
+        
+        tvScreen.isHidden = false
+        
+        UIView.animate(withDuration: 0.1, animations: { [self] in
+            
+            tvScreen.transform = CGAffineTransform(scaleX: widthScale, y: 1)
+            
+        }, completion: { [self] (finished: Bool) in
+
+        UIView.animate(withDuration: 0.2, animations: { [self] in
+            
+            tvScreen.transform = CGAffineTransform(scaleX: widthScale, y: heightScale)
+            
+        }, completion: {_ in
+            
+            complete()
+            
+        }) })
+    }
+    
+    @IBAction func continueDialogue(_ sender: Any) {
+        switch currentDialogueStage {
+        case 0:
+            dialogueView.characterByCharacter(string: """
+                    When disaster began to loom, however, a researcher discovered an Ancient Greek myth suggesting the existence of spirits living in the constellations. These findings were presented to the space administration, who begrudgingly approved a flight to the constellation of rebirth — the Phoenix — to acquire a "rebirth" of their home. Such a journey would drain the last of Lunaro's energy supply, turning this into an extremely high-stakes mission.
+                    """)
+        case 1:
+            dialogueView.characterByCharacter(string: """
+                    You, a professional space traveller, have been entrusted to pilot this flight. To complete your goal, you need to venture to some of these stars and collect samples. These samples, the researcher believes, can summon the Phoenix when fused with one another.
+
+                    Your craft is equipped with a set of mixtures that can each dissolve certain debris, which you must utilise combined with precision steering skills in order to protect you and your ship.
+                    """)
+        case 2:
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true, completion: nil)
+            
+            view.layer.removeAllAnimations()
+            cloudView.layer.removeAllAnimations()
+            timer.invalidate()
+        default: break
+        }
+        
+        currentDialogueStage += 1
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
         // MARK: View Initialisation
+        continueButton.alpha = 0
+        dialogueView.alpha = 0
         
         // Sets up and displays the inital background gradient.
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
@@ -85,9 +181,15 @@ class ViewController: UIViewController, CAAnimationDelegate {
         starView.alpha = 0
     }
     
-    func cycleTime(time: Time) {
+    func cycleTime(time: Time, express: Bool = false) {
         
         CATransaction.begin()
+        
+        var duration = CFTimeInterval(10)
+        
+        if express {
+            duration = 2
+        }
 
         let oldColours = gradient.colors
         let newColours = coloursFromTime(time: time)
@@ -98,20 +200,20 @@ class ViewController: UIViewController, CAAnimationDelegate {
 
         animation.fromValue = oldColours
         animation.toValue = newColours
-        animation.duration = 10
+        animation.duration = duration
         animation.isRemovedOnCompletion = true
         animation.fillMode = .forwards
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
         animation.delegate = self
         
         if time == .Night {
-            UIView.animate(withDuration: 10) { [self] in
+            UIView.animate(withDuration: duration) { [self] in
                 starView.alpha = 1
             }
         }
         
         if time == .Sunrise {
-            UIView.animate(withDuration: 10) { [self] in
+            UIView.animate(withDuration: duration) { [self] in
                 starView.alpha = 0
             }
         }
@@ -130,9 +232,9 @@ class ViewController: UIViewController, CAAnimationDelegate {
             } else {
                 
                 switch time {
-                    case .Sunrise: cycleTime(time: .Daytime)
-                    case .Evening: cycleTime(time: .Night)
-                    default: break
+                case .Sunrise: cycleTime(time: .Daytime)
+                case .Evening: cycleTime(time: .Night)
+                default: break
                 }
                 
             }
@@ -174,4 +276,25 @@ class ViewController: UIViewController, CAAnimationDelegate {
         }
     }
     
+}
+
+extension UITextView {
+    func characterByCharacter(string: String, timeToComplete: TimeInterval = 3) {
+        let characters = string.count
+        var currentString = ""
+        var count = 0
+        
+        Timer.scheduledTimer(withTimeInterval: timeToComplete / Double(characters), repeats: true, block: { [self] timer in
+            if count == characters {
+                timer.invalidate()
+                self.text = currentString
+            } else {
+                let index = string.index(string.startIndex, offsetBy: count)
+                currentString.append(string[index])
+                self.text = currentString + "█"
+                count += 1
+            }
+        })
+        
+    }
 }

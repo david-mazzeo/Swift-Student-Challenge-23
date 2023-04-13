@@ -65,6 +65,38 @@
                                     <segue destination="HGE-vU-Wet" kind="show" id="K0X-1Z-jJ2"/>
                                 </connections>
                             </button>
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tall CRT Shape" translatesAutoresizingMaskIntoConstraints="NO" id="XeG-JM-pth">
+                                <rect key="frame" x="205" y="456" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="20" id="IkO-2E-3XF"/>
+                                    <constraint firstAttribute="height" constant="20" id="TLe-2V-c45"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Blq-e3-JuB">
+                                <rect key="frame" x="116" y="448" width="198" height="66"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="66" id="bCF-iv-pTL"/>
+                                    <constraint firstAttribute="width" constant="198" id="qo3-Xq-faP"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Continue" cornerStyle="capsule">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="30"/>
+                                    <color key="baseBackgroundColor" systemColor="systemGreenColor"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="continueDialogue:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="tEz-01-dfQ"/>
+                                </connections>
+                            </button>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gds-L9-xZF">
+                                <rect key="frame" x="205" y="406" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="20" id="Z3e-wa-I9m"/>
+                                    <constraint firstAttribute="width" constant="20" id="rth-bz-fqq"/>
+                                </constraints>
+                                <color key="textColor" systemColor="systemGreenColor"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rZJ-Oh-1np">
                                 <rect key="frame" x="134.66666666666666" y="433" width="160.99999999999997" height="66"/>
                                 <constraints>
@@ -83,25 +115,38 @@
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
-                        <color key="backgroundColor" systemColor="systemTealColor"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="K2C-lk-9rc" secondAttribute="trailing" id="5vM-Ux-gbf"/>
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="VvB-vn-uqR" secondAttribute="bottom" constant="16" id="7Jg-yN-Mtl"/>
                             <constraint firstItem="VvB-vn-uqR" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="7MV-xX-LcB"/>
+                            <constraint firstItem="Blq-e3-JuB" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="Keg-X8-Zpg"/>
+                            <constraint firstItem="Gds-L9-xZF" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="L3u-FY-mc1"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="UsU-XU-WWa"/>
                             <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="VLT-ok-LOq"/>
+                            <constraint firstItem="Gds-L9-xZF" firstAttribute="bottomMargin" secondItem="Blq-e3-JuB" secondAttribute="top" constant="-30" id="W6y-Bi-2mx"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="XaD-K1-uvB"/>
                             <constraint firstItem="K2C-lk-9rc" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="eh0-oz-Oij"/>
+                            <constraint firstItem="XeG-JM-pth" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="fBO-S4-oQp"/>
                             <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="if2-uQ-R63"/>
+                            <constraint firstItem="Gds-L9-xZF" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" constant="-50" id="ivQ-uc-fN8"/>
+                            <constraint firstItem="XeG-JM-pth" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="qRQ-1C-3I3"/>
                             <constraint firstItem="K2C-lk-9rc" firstAttribute="leading" secondItem="5EZ-qb-Rvc" secondAttribute="leading" id="zNO-4Q-GdI"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="gV0-9o-GIH"/>
                     <connections>
+                        <outlet property="aboutButton" destination="VvB-vn-uqR" id="zAz-7v-SeR"/>
                         <outlet property="cloudOne" destination="iei-S9-YXY" id="ElJ-p1-R1I"/>
                         <outlet property="cloudTwo" destination="gUq-5I-b3y" id="k7o-0D-BD9"/>
                         <outlet property="cloudView" destination="j1G-z3-1Mj" id="m21-SR-5Ps"/>
+                        <outlet property="continueButton" destination="Blq-e3-JuB" id="61Y-bK-50S"/>
+                        <outlet property="dialogueView" destination="Gds-L9-xZF" id="qaG-Ue-kqQ"/>
+                        <outlet property="goButton" destination="rZJ-Oh-1np" id="2E6-lv-JSd"/>
                         <outlet property="starView" destination="K2C-lk-9rc" id="r21-lc-pU1"/>
+                        <outlet property="textHeightConstraint" destination="Z3e-wa-I9m" id="kkr-On-oxg"/>
+                        <outlet property="textWidthConstraint" destination="rth-bz-fqq" id="WJm-b0-ATg"/>
+                        <outlet property="tvScreen" destination="XeG-JM-pth" id="0dT-9x-05p"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -255,6 +300,7 @@
     </scenes>
     <resources>
         <image name="Day Clouds" width="1000" height="40"/>
+        <image name="Tall CRT Shape" width="1188" height="1601"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
@@ -266,9 +312,6 @@
         </systemColor>
         <systemColor name="systemRedColor">
             <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemTealColor">
-            <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
