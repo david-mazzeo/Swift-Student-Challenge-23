@@ -5,10 +5,10 @@
       "idiom" : "universal",
       "resizing" : {
         "cap-insets" : {
-          "bottom" : 800,
+          "bottom" : 850,
           "left" : 593,
           "right" : 594,
-          "top" : 800
+          "top" : 850
         },
         "center" : {
           "height" : 1,
@@ -23,10 +23,10 @@
       "idiom" : "ipad",
       "resizing" : {
         "cap-insets" : {
-          "bottom" : 700,
+          "bottom" : 593,
           "left" : 593,
           "right" : 594,
-          "top" : 700
+          "top" : 593
         },
         "center" : {
           "height" : 1,

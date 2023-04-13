@@ -44,35 +44,35 @@ class ViewController: UIViewController, CAAnimationDelegate {
                     dialogueView.alpha = 1
                     continueButton.alpha = 1
                 }, completion: { [self] (finished: Bool) in
+                    continueButton.isEnabled = false
                     dialogueView.characterByCharacter(string: """
                     You are a citizen of the planet Lunaro, home to a colony of humans who settled here recently. Although previously thriving, recent climate pollution — manifesting as a cloud of gases encasing the planet, blocking solar energy — has thrown the lives of millions into jeopardy.
-                    """)
+                    """, complete: { [self] in
+                        continueButton.isEnabled = true
+                    })
                 })
                 
             }
             
         })
-
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
-//        vc.modalPresentationStyle = .fullScreen
-//        self.present(vc, animated: true, completion: nil)
-        
-//        view.layer.removeAllAnimations()
-//        cloudView.layer.removeAllAnimations()
-//        timer.invalidate()
         
     }
     
     func presentTV(complete: @escaping () -> Void) {
         
-        let widthScale = (self.view.frame.width - 40) / 20
-        let heightScale = (self.view.frame.height - 200) / 20
+        var widthScale = CGFloat(0)
+        var heightScale = CGFloat(0)
         
         if UIDevice.current.userInterfaceIdiom == .pad {
+            widthScale = (self.view.frame.width - 40) / 20
+            heightScale = (self.view.frame.height - 400) / 20
+            
             textWidthConstraint.constant = (widthScale * 20) - 170
             textHeightConstraint.constant = (heightScale * 20) - 300
         } else {
+            widthScale = (self.view.frame.width - 40) / 20
+            heightScale = (self.view.frame.height - 100) / 20
+            
             textWidthConstraint.constant = (widthScale * 20) - 80
             textHeightConstraint.constant = (heightScale * 20) - 200
         }
@@ -99,15 +99,21 @@ class ViewController: UIViewController, CAAnimationDelegate {
     @IBAction func continueDialogue(_ sender: Any) {
         switch currentDialogueStage {
         case 0:
+            continueButton.isEnabled = false
             dialogueView.characterByCharacter(string: """
                     When disaster began to loom, however, a researcher discovered an Ancient Greek myth suggesting the existence of spirits living in the constellations. These findings were presented to the space administration, who begrudgingly approved a flight to the constellation of rebirth — the Phoenix — to acquire a "rebirth" of their home. Such a journey would drain the last of Lunaro's energy supply, turning this into an extremely high-stakes mission.
-                    """)
+                    """, complete: { [self] in
+                continueButton.isEnabled = true
+            })
         case 1:
+            continueButton.isEnabled = false
             dialogueView.characterByCharacter(string: """
                     You, a professional space traveller, have been entrusted to pilot this flight. To complete your goal, you need to venture to some of these stars and collect samples. These samples, the researcher believes, can summon the Phoenix when fused with one another.
 
                     Your craft is equipped with a set of mixtures that can each dissolve certain debris, which you must utilise combined with precision steering skills in order to protect you and your ship.
-                    """)
+                    """, complete: { [self] in
+                        continueButton.isEnabled = true
+                    })
         case 2:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
@@ -127,6 +133,11 @@ class ViewController: UIViewController, CAAnimationDelegate {
         super.viewDidLoad()
         
         // MARK: View Initialisation
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            dialogueView.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        }
+        
+        continueButton.isEnabled = false
         continueButton.alpha = 0
         dialogueView.alpha = 0
         
@@ -279,15 +290,16 @@ class ViewController: UIViewController, CAAnimationDelegate {
 }
 
 extension UITextView {
-    func characterByCharacter(string: String, timeToComplete: TimeInterval = 3) {
+    func characterByCharacter(string: String, complete: @escaping () -> Void) {
         let characters = string.count
         var currentString = ""
         var count = 0
         
-        Timer.scheduledTimer(withTimeInterval: timeToComplete / Double(characters), repeats: true, block: { [self] timer in
+        Timer.scheduledTimer(withTimeInterval: 0.00825, repeats: true, block: { [self] timer in
             if count == characters {
                 timer.invalidate()
                 self.text = currentString
+                complete()
             } else {
                 let index = string.index(string.startIndex, offsetBy: count)
                 currentString.append(string[index])
