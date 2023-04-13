@@ -33,6 +33,8 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     @IBAction func go(_ sender: Any) {
         
+        UserDefaults.standard.set(1, forKey: "nextLevel")
+        
         UIView.animate(withDuration: 1, animations: { [self] in
             goButton.alpha = 0
             aboutButton.alpha = 0
