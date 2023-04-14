@@ -16,6 +16,8 @@ class SpaceFlightController: UIViewController {
     
     let gradient = CAGradientLayer()
     var animationTimer = Timer()
+    var currentView = "Game"
+    let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     
     @IBOutlet weak var backgroundView: UIView!
     var spriteKitView = SKView()
@@ -106,16 +108,39 @@ class SpaceFlightController: UIViewController {
             
             initSK()
             spriteKitView.alpha = 0
-            spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+            
+            if currentView == "Game" {
+                spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                currentView = "Sample"
+            } else {
+                spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                currentView = "Game"
+            }
             
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 backgroundView.alpha = 1
                 spriteKitView.alpha = 1
+                
+                if currentView == "Game" {
+                    elementOneButton.alpha = 1
+                    elementTwoButton.alpha = 1
+                    
+                    livesButton.alpha = 1
+                    destroyedButton.alpha = 1
+                    elapsedButton.alpha = 1
+                }
             })
         })
     }
     
     func cleanSK() {
+        elapsedButton.configuration?.attributedTitle = AttributedString("0%", attributes: HUDAttributes)
+        destroyedButton.configuration?.attributedTitle = AttributedString("0", attributes: HUDAttributes)
+        livesButton.configuration?.attributedTitle = AttributedString("3", attributes: HUDAttributes)
+        
+        objectsHit = 0
+        livesRemaining = 3
+        
         spriteKitView.scene?.removeAllActions()
         spriteKitView.scene?.removeAllChildren()
         spriteKitView.scene?.removeFromParent()
@@ -131,9 +156,18 @@ class SpaceFlightController: UIViewController {
     @objc func startLevel(_ notification: Notification) {
         animateBackground()
         
+        var duration = Double(0)
+        
+        switch UserDefaults.standard.integer(forKey: "nextLevel") {
+        case 1: duration = 15
+        case 2: duration = 20
+        case 3: duration = 30
+        default: break
+        }
+        
         var percentElapsed = 0
         
-        let elapsedTimer = Timer.scheduledTimer(withTimeInterval: 15/100, repeats: true, block: { [self] timer in
+        Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
             percentElapsed += 1
             elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
             
@@ -408,6 +442,66 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             
+            if level == 2 {
+                isTVOn = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                    displayTV(dialogue: "Destination set to the second star. Let's do this!", speaker: "Scientist")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
+                        hideTV()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                            displayTV(dialogue: "Comets are present in this area. Fire at them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                                hideTV(complete: { [self] in
+                                    isTVOn = false
+                                })
+                                
+                                NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
+                                run(SKAction.repeatForever(SKAction.sequence([
+                                    SKAction.run { [self] in
+                                        if !isRoundFinished {
+                                            pickObject()
+                                        }
+                                    },
+                                    SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if level == 3 {
+                isTVOn = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                    displayTV(dialogue: "This is the final stretch! You can do this!", speaker: "Scientist")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
+                        hideTV()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                            displayTV(dialogue: "Black holes are present in this area. Prevent them from sucking you in by steering away from them!", speaker: "System")
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                                hideTV(complete: { [self] in
+                                    isTVOn = false
+                                })
+                                
+                                NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
+                                run(SKAction.repeatForever(SKAction.sequence([
+                                    SKAction.run { [self] in
+                                        if !isRoundFinished {
+                                            pickObject()
+                                        }
+                                    },
+                                    SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                            }
+                        }
+                    }
+                }
+            }
+            
         })
         
     }
@@ -492,18 +586,20 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func hideTV(complete: (() -> Void)? = nil) {
-        let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
-        let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
-        
-        TVScreen.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
-        croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
-            croppedFrame.removeAllChildren()
-            croppedFrame.removeFromParent()
+        if isTVOn {
+            let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
+            let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
             
-            if complete != nil {
-                complete!()
-            }
-        }]))
+            TVScreen.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
+            croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
+                croppedFrame.removeAllChildren()
+                croppedFrame.removeFromParent()
+                
+                if complete != nil {
+                    complete!()
+                }
+            }]))
+        }
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
@@ -655,13 +751,18 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func pickHitDialogue() -> String {
         let randomNumber = Int.random(in: 0 ..< 5)
+        var livesText = "lives"
+        
+        if livesRemaining == 1 {
+            livesText = "life"
+        }
         
         switch randomNumber {
-        case 0: return "Be careful! \(livesRemaining) lives remaining!"
-        case 1: return "Don't be reckless! \(livesRemaining) lives left!"
-        case 2: return "Hey, are you ok?! You have \(livesRemaining) lives left!"
-        case 3: return "Uh-oh, is everything alright? \(livesRemaining) lives remaining."
-        case 4: return "\(livesRemaining) lives remaining, break some stuff to get them back!"
+        case 0: return "Be careful! \(livesRemaining) \(livesText) remaining!"
+        case 1: return "Don't be reckless! \(livesRemaining) \(livesText) left!"
+        case 2: return "Hey, are you ok?! You have \(livesRemaining) \(livesText) left!"
+        case 3: return "Uh-oh, is everything alright? \(livesRemaining) \(livesText) remaining."
+        case 4: return "\(livesRemaining) \(livesText) remaining, break some stuff to get them back!"
         default: break
         }
         
@@ -921,97 +1022,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         beam.removeAllChildren()
         protagonist.removeAllChildren()
         isBeamActive = false
-    }
-    
-}
-
-class StarSampleScene: SKScene {
-    
-    let deviceHeight = UIScreen.main.bounds.height
-    let deviceWidth = UIScreen.main.bounds.width
-    let level = UserDefaults.standard.integer(forKey: "nextLevel")
-    
-    let rocketImages = [SKTexture(imageNamed: "Rocket 1"),
-                        SKTexture(imageNamed: "Rocket 2"),
-                        SKTexture(imageNamed: "Rocket 3"),
-                        SKTexture(imageNamed: "Rocket 4"),
-                        SKTexture(imageNamed: "Rocket 3A"),
-                        SKTexture(imageNamed: "Rocket 5"),
-                        SKTexture(imageNamed: "Rocket 6")]
-    
-    var beamImages = [SKTexture]()
-    
-    override func didMove(to view: SKView) {
-        
-        var starMultiplier = CGFloat(20)
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            starMultiplier = 10
-        }
-        
-        self.backgroundColor = .clear
-        self.view?.allowsTransparency = true
-        self.view?.backgroundColor = .clear
-        self.scaleMode = .aspectFit
-        
-        for image in rocketImages {
-            image.filteringMode = .nearest
-        }
-        
-        let protagonist = SKSpriteNode(imageNamed: "Rocket 1")
-        
-        protagonist.size = CGSize(width: 108, height: 180)
-        protagonist.position = CGPoint(x: 230 + (starMultiplier * 12), y: deviceHeight / 2)
-        protagonist.zRotation = .pi / 2
-        
-        let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: rocketImages, timePerFrame: 0.1))
-        protagonist.run(rocketAnimation)
-        
-        self.addChild(protagonist)
-        
-        var starName = ""
-        
-        switch level {
-        case 1:
-            starName = "Red Star"
-            beamImages = [SKTexture(imageNamed: "Red Sample 1"),
-                          SKTexture(imageNamed: "Red Sample 2")]
-            
-        case 2:
-            starName = "Yellow Star"
-            beamImages = [SKTexture(imageNamed: "Yellow Sample 1"),
-                          SKTexture(imageNamed: "Yellow Sample 2")]
-            
-        case 3:
-            starName = "Blue Star"
-            beamImages = [SKTexture(imageNamed: "Blue Sample 1"),
-                          SKTexture(imageNamed: "Blue Sample 2")]
-            
-        default: break
-        }
-        
-        for image in beamImages {
-            image.filteringMode = .nearest
-        }
-        
-        let texture = SKTexture(imageNamed: starName)
-        texture.filteringMode = .nearest
-        let star = SKSpriteNode(texture: texture)
-        
-        star.size = CGSize(width: 24 * starMultiplier, height: 48 * starMultiplier)
-        star.position = CGPoint(x: 144, y: deviceHeight / 2)
-        
-        self.addChild(star)
-        
-        let beam = SKSpriteNode(texture: beamImages.first)
-        
-        beam.size = CGSize(width: 66, height: 60)
-        beam.position = CGPoint(x: 90 + (starMultiplier * 12), y: deviceHeight / 2)
-        
-        let beamAnimation = SKAction.repeatForever(SKAction.animate(with: beamImages, timePerFrame: 0.3))
-        beam.run(beamAnimation)
-        
-        self.addChild(beam)
     }
     
 }

@@ -36,10 +36,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
         UserDefaults.standard.set(1, forKey: "nextLevel")
         
         // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true, completion: nil)
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+//        vc.modalPresentationStyle = .fullScreen
+//        self.present(vc, animated: true, completion: nil)
         // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
         
         UIView.animate(withDuration: 1, animations: { [self] in
@@ -117,7 +117,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         case 1:
             continueButton.isEnabled = false
             dialogueView.characterByCharacter(string: """
-                    You, a professional space traveller, have been entrusted to pilot this flight. To complete your goal, you need to venture to some of these stars and collect samples. These samples, the researcher believes, can summon the Phoenix when fused with one another.
+                    You, a professional space traveller, have been entrusted to pilot this flight. To complete your goal, you need to venture to three of the constellation's stars and collect samples. When fused with each other, the researcher believes, these samples can summon the Phoenix.
 
                     Your craft is equipped with a set of mixtures that can each dissolve certain debris, which you must utilise combined with precision steering skills in order to protect you and your ship.
                     """, complete: { [self] in
