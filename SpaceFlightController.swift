@@ -15,10 +15,10 @@ var livesRemaining = 3
 class SpaceFlightController: UIViewController {
     
     let gradient = CAGradientLayer()
-    var timer = Timer()
+    var animationTimer = Timer()
     
     @IBOutlet weak var backgroundView: UIView!
-    @IBOutlet weak var flightScene: SKView!
+    var spriteKitView = SKView()
     
     @IBOutlet weak var elementOneButton: UIButton!
     @IBOutlet weak var elementTwoButton: UIButton!
@@ -61,7 +61,9 @@ class SpaceFlightController: UIViewController {
         self.view.layer.insertSublayer(gradient, at: 0)
         
         self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
-        flightScene.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        
+        initSK()
+        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(switchViews(_:)), name: Notification.Name("switchViews"), object: nil)
@@ -75,18 +77,55 @@ class SpaceFlightController: UIViewController {
         let patternHeight = -(444 * UIScreen.main.scale)
         bottomBackgroundConstraint.constant = patternHeight
         
-        timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [self] timer in
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [self] timer in
             backgroundView.transform = CGAffineTransform(translationX: 0, y: patternHeight)
             UIView.animate(withDuration: 30, delay: 0, options: [.curveLinear], animations: { [self] in
                 backgroundView.transform = CGAffineTransform(translationX: 0, y: 0)
             })
         })
         
-        timer.fire()
+        animationTimer.fire()
     }
     
     @objc func switchViews(_ notification: Notification) {
-        flightScene.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
+            spriteKitView.alpha = 0
+            
+            backgroundView.alpha = 0
+            backgroundView.layer.removeAllAnimations()
+            
+            elementOneButton.alpha = 0
+            elementTwoButton.alpha = 0
+            
+            livesButton.alpha = 0
+            destroyedButton.alpha = 0
+            elapsedButton.alpha = 0
+            
+        }, completion: { [self] (finished: Bool) in
+            cleanSK()
+            
+            initSK()
+            spriteKitView.alpha = 0
+            spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+            
+            UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
+                backgroundView.alpha = 1
+                spriteKitView.alpha = 1
+            })
+        })
+    }
+    
+    func cleanSK() {
+        spriteKitView.scene?.removeAllActions()
+        spriteKitView.scene?.removeAllChildren()
+        spriteKitView.scene?.removeFromParent()
+        spriteKitView.presentScene(nil)
+        spriteKitView.removeFromSuperview()
+    }
+    
+    func initSK() {
+        spriteKitView = SKView(frame: CGRect(x: 0, y: -100, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height + 200))
+        self.view.insertSubview(spriteKitView, at: 2)
     }
     
     @objc func startLevel(_ notification: Notification) {
@@ -94,14 +133,14 @@ class SpaceFlightController: UIViewController {
         
         var percentElapsed = 0
         
-        Timer.scheduledTimer(withTimeInterval: 15/100, repeats: true, block: { [self] timer in
+        let elapsedTimer = Timer.scheduledTimer(withTimeInterval: 15/100, repeats: true, block: { [self] timer in
             percentElapsed += 1
             elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
             
             if percentElapsed >= 100 {
                 NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
+                animationTimer.invalidate()
                 timer.invalidate()
-                backgroundView.layer.removeAllAnimations()
             }
         })
     }
@@ -222,7 +261,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     var isRoundFinished = false
     var objectPickerMax = 0
     var forceModifier = Double(0)
-    let motionEngine = CMMotionManager()
+    var motionEngine = CMMotionManager()
     
     let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
     let protagonist = SKSpriteNode(imageNamed: "Rocket 1.png")
@@ -358,8 +397,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                                     displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
                                     
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                                        hideTV()
-                                        isTVOn = false
+                                        hideTV(complete: { [self] in
+                                            isTVOn = false
+                                        })
                                     }
                                 }
                             }
@@ -451,7 +491,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         croppedFrame.maskNode!.run(SKAction.sequence([firstGrow, secondGrow]))
     }
     
-    func hideTV() {
+    func hideTV(complete: (() -> Void)? = nil) {
         let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
         let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
         
@@ -459,6 +499,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
             croppedFrame.removeAllChildren()
             croppedFrame.removeFromParent()
+            
+            if complete != nil {
+                complete!()
+            }
         }]))
     }
     
@@ -582,8 +626,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                    hideTV()
-                    isTVOn = false
+                    hideTV(complete: { [self] in
+                        isTVOn = false
+                    })
                 }
             }
             
@@ -625,6 +670,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     @objc func finishLevel(_ notification: Notification) {
         isRoundFinished = true
+        motionEngine.stopAccelerometerUpdates()
+        motionEngine.stopGyroUpdates()
+        
         for child in self.children {
             
             if child.name == "Asteroid" {
@@ -656,8 +704,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if isTVOn {
-            hideTV()
-            isTVOn = false
+            hideTV(complete: { [self] in
+                isTVOn = false
+            })
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
                 displayTV(dialogue: "Nice work! Now to grab a sample of that star...", speaker: "Scientist")
             }
@@ -666,7 +716,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-            hideTV()
+            hideTV(complete: { [self] in
+                isTVOn = false
+            })
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
             }

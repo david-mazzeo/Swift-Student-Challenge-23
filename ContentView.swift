@@ -130,6 +130,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
             self.present(vc, animated: true, completion: nil)
             
             view.layer.removeAllAnimations()
+            gradient.removeAllAnimations()
             cloudView.layer.removeAllAnimations()
             timer.invalidate()
         default: break
