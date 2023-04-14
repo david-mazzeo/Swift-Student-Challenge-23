@@ -18,7 +18,7 @@ class SpaceFlightController: UIViewController {
     var timer = Timer()
     
     @IBOutlet weak var backgroundView: UIView!
-    @IBOutlet weak var spriteKitView: SKView!
+    @IBOutlet weak var flightScene: SKView!
     
     @IBOutlet weak var elementOneButton: UIButton!
     @IBOutlet weak var elementTwoButton: UIButton!
@@ -61,9 +61,10 @@ class SpaceFlightController: UIViewController {
         self.view.layer.insertSublayer(gradient, at: 0)
         
         self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
-        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        flightScene.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(switchViews(_:)), name: Notification.Name("switchViews"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(hitObject(_:)), name: Notification.Name("asteroidHit"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(startLevel(_:)), name: Notification.Name("startLevel"), object: nil)
@@ -84,6 +85,10 @@ class SpaceFlightController: UIViewController {
         timer.fire()
     }
     
+    @objc func switchViews(_ notification: Notification) {
+        flightScene.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+    }
+    
     @objc func startLevel(_ notification: Notification) {
         animateBackground()
         
@@ -94,8 +99,9 @@ class SpaceFlightController: UIViewController {
             elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
             
             if percentElapsed >= 100 {
-                NotificationCenter.default.post(name: NSNotification.Name("endLevel"), object: nil)
+                NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
                 timer.invalidate()
+                backgroundView.layer.removeAllAnimations()
             }
         })
     }
@@ -213,6 +219,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     var isBeamActive = false
     var isAlreadyBlackHole = false
     var healthEvents = true
+    var isRoundFinished = false
     var objectPickerMax = 0
     var forceModifier = Double(0)
     let motionEngine = CMMotionManager()
@@ -293,6 +300,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
+            print(xAxis)
             if isSetup {
                 protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + forceModifier, dy: 0))
             }
@@ -338,12 +346,16 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                                 hideTV()
                                 NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
                                 run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run(pickObject),
+                                    SKAction.run { [self] in
+                                        if !isRoundFinished {
+                                            pickObject()
+                                        }
+                                    },
                                     SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
                                 
                                                                                                     
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                                    displayTV(dialogue: "You can gain a life with every 10 objects you destroy, but lose one if your ship gets hit.", speaker: "System")
+                                    displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
                                     
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
                                         hideTV()
@@ -507,16 +519,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         if contact.bodyA.node?.name == "Rocket" && isEnemy && healthEvents {
             
-            if !isTVOn {
-                isTVOn = true
-                displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                    hideTV()
-                    isTVOn = false
-                }
-            }
-            
             if UIDevice.current.userInterfaceIdiom == .phone {
                 let tapticFeedback = UINotificationFeedbackGenerator()
                 tapticFeedback.notificationOccurred(.error)
@@ -575,6 +577,16 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             livesRemaining -= 1
             NotificationCenter.default.post(Notification(name: Notification.Name("lifeModified")))
             
+            if !isTVOn {
+                isTVOn = true
+                displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                    hideTV()
+                    isTVOn = false
+                }
+            }
+            
             healthEvents = false
             var timerCount = 0
             
@@ -612,7 +624,53 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc func finishLevel(_ notification: Notification) {
+        isRoundFinished = true
+        for child in self.children {
+            
+            if child.name == "Asteroid" {
+                
+                child.run(SKAction.sequence([SKAction.run {
+                    child.physicsBody = nil
+                }, SKAction.animate(with: asteroidDestroyedImages, timePerFrame: 1/33),
+                    SKAction.removeFromParent()]))
+                
+            }
+            
+            if child.name == "Comet" {
+                
+                child.run(SKAction.sequence([SKAction.run {
+                    child.physicsBody = nil
+                }, SKAction.animate(with: cometDestroyedImages, timePerFrame: 1/33),
+                    SKAction.removeFromParent()]))
+                
+            }
+            
+            if child.name == "Black Hole" {
+                
+                child.run(SKAction.sequence([SKAction.run {
+                    child.physicsBody = nil
+                }, SKAction.fadeAlpha(to: 0, duration: 0.33),
+                    SKAction.removeFromParent()]))
+                
+            }
+        }
         
+        if isTVOn {
+            hideTV()
+            isTVOn = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                displayTV(dialogue: "Nice work! Now to grab a sample of that star...", speaker: "Scientist")
+            }
+        } else {
+            displayTV(dialogue: "Nice work! Now to grab a sample of that star...", speaker: "Scientist")
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+            hideTV()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
+            }
+        }
     }
     
     func random() -> CGFloat {
@@ -810,6 +868,63 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         beam.removeAllChildren()
         protagonist.removeAllChildren()
         isBeamActive = false
+    }
+    
+}
+
+class StarSampleScene: SKScene {
+    
+    let deviceHeight = UIScreen.main.bounds.height
+    let deviceWidth = UIScreen.main.bounds.width
+    let level = UserDefaults.standard.integer(forKey: "nextLevel")
+    
+    let rocketImages = [SKTexture(image: UIImage(named: "Rocket 1")!),
+                        SKTexture(image: UIImage(named: "Rocket 2")!),
+                        SKTexture(image: UIImage(named: "Rocket 3")!),
+                        SKTexture(image: UIImage(named: "Rocket 4")!),
+                        SKTexture(image: UIImage(named: "Rocket 3A")!),
+                        SKTexture(image: UIImage(named: "Rocket 5")!),
+                        SKTexture(image: UIImage(named: "Rocket 6")!)]
+    
+    override func didMove(to view: SKView) {
+        
+        self.backgroundColor = .clear
+        self.view?.allowsTransparency = true
+        self.view?.backgroundColor = .clear
+        self.scaleMode = .aspectFit
+        
+        for image in rocketImages {
+            image.filteringMode = .nearest
+        }
+        
+        let protagonist = SKSpriteNode(imageNamed: "Rocket 1")
+        
+        protagonist.size = CGSize(width: 72, height: 120)
+        protagonist.position = CGPoint(x: (deviceWidth / 2) + 100, y: deviceHeight / 2)
+        protagonist.zRotation = .pi / 2
+        
+        let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: rocketImages, timePerFrame: 0.1))
+        protagonist.run(rocketAnimation)
+        
+        self.addChild(protagonist)
+        
+        var starName = ""
+        
+        switch level {
+        case 1: starName = "Red Star"
+        case 2: starName = "Yellow Star"
+        case 3: starName = "Blue Star"
+        default: break
+        }
+        
+        let texture = SKTexture(image: UIImage(named: starName)!)
+        texture.filteringMode = .nearest
+        let star = SKSpriteNode(texture: texture)
+        
+        star.size = CGSize(width: 144, height: 288)
+        star.position = CGPoint(x: 72, y: deviceHeight / 2)
+        
+        self.addChild(star)
     }
     
 }

@@ -35,6 +35,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         UserDefaults.standard.set(1, forKey: "nextLevel")
         
+        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true, completion: nil)
+        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
+        
         UIView.animate(withDuration: 1, animations: { [self] in
             goButton.alpha = 0
             aboutButton.alpha = 0

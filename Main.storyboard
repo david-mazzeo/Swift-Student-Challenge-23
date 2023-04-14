@@ -273,8 +273,8 @@
                         <outlet property="elapsedButton" destination="wft-le-i9C" id="T5M-PG-4Zy"/>
                         <outlet property="elementOneButton" destination="lbc-Js-FKN" id="41M-nI-71o"/>
                         <outlet property="elementTwoButton" destination="edm-lE-ZMZ" id="iNQ-f1-ptJ"/>
+                        <outlet property="flightScene" destination="5h4-MU-TuJ" id="7KL-Fi-hZk"/>
                         <outlet property="livesButton" destination="Up1-Iv-hs4" id="MOs-fI-54F"/>
-                        <outlet property="spriteKitView" destination="5h4-MU-TuJ" id="xwK-JE-Bsi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AId-Wz-dO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -300,7 +300,7 @@
     </scenes>
     <resources>
         <image name="Day Clouds" width="1000" height="40"/>
-        <image name="Tall CRT Shape" width="1188" height="1601"/>
+        <image name="Tall CRT Shape" width="1188" height="1701"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
