@@ -92,7 +92,6 @@ class SpaceFlightController: UIViewController {
             spriteKitView.alpha = 0
             
             backgroundView.alpha = 0
-            backgroundView.layer.removeAllAnimations()
             
             elementOneButton.alpha = 0
             elementTwoButton.alpha = 0
@@ -102,6 +101,7 @@ class SpaceFlightController: UIViewController {
             elapsedButton.alpha = 0
             
         }, completion: { [self] (finished: Bool) in
+            backgroundView.layer.removeAllAnimations()
             cleanSK()
             
             initSK()
@@ -163,95 +163,95 @@ class SpaceFlightController: UIViewController {
 
 class FlightScene: SKScene, SKPhysicsContactDelegate {
     
-    let rocketImages = [SKTexture(image: UIImage(named: "Rocket 1")!),
-                        SKTexture(image: UIImage(named: "Rocket 2")!),
-                        SKTexture(image: UIImage(named: "Rocket 3")!),
-                        SKTexture(image: UIImage(named: "Rocket 4")!),
-                        SKTexture(image: UIImage(named: "Rocket 3A")!),
-                        SKTexture(image: UIImage(named: "Rocket 5")!),
-                        SKTexture(image: UIImage(named: "Rocket 6")!)]
+    let rocketImages = [SKTexture(imageNamed: "Rocket 1"),
+                        SKTexture(imageNamed: "Rocket 2"),
+                        SKTexture(imageNamed: "Rocket 3"),
+                        SKTexture(imageNamed: "Rocket 4"),
+                        SKTexture(imageNamed: "Rocket 3A"),
+                        SKTexture(imageNamed: "Rocket 5"),
+                        SKTexture(imageNamed: "Rocket 6")]
     
-    let cometImages = [SKTexture(image: UIImage(named: "Comet 1")!),
-                       SKTexture(image: UIImage(named: "Comet 2")!),
-                       SKTexture(image: UIImage(named: "Comet 3")!),
-                       SKTexture(image: UIImage(named: "Comet 4")!),
-                       SKTexture(image: UIImage(named: "Comet 5")!),
-                       SKTexture(image: UIImage(named: "Comet 6")!),
-                       SKTexture(image: UIImage(named: "Comet 7")!),
-                       SKTexture(image: UIImage(named: "Comet 8")!)]
+    let cometImages = [SKTexture(imageNamed: "Comet 1"),
+                       SKTexture(imageNamed: "Comet 2"),
+                       SKTexture(imageNamed: "Comet 3"),
+                       SKTexture(imageNamed: "Comet 4"),
+                       SKTexture(imageNamed: "Comet 5"),
+                       SKTexture(imageNamed: "Comet 6"),
+                       SKTexture(imageNamed: "Comet 7"),
+                       SKTexture(imageNamed: "Comet 8")]
     
-    let blackHoleImages = [SKTexture(image: UIImage(named: "Black Hole 1")!),
-                           SKTexture(image: UIImage(named: "Black Hole 2")!),
-                           SKTexture(image: UIImage(named: "Black Hole 3")!),
-                           SKTexture(image: UIImage(named: "Black Hole 4")!),
-                           SKTexture(image: UIImage(named: "Black Hole 5")!),
-                           SKTexture(image: UIImage(named: "Black Hole 6")!),
-                           SKTexture(image: UIImage(named: "Black Hole 7")!)]
+    let blackHoleImages = [SKTexture(imageNamed: "Black Hole 1"),
+                           SKTexture(imageNamed: "Black Hole 2"),
+                           SKTexture(imageNamed: "Black Hole 3"),
+                           SKTexture(imageNamed: "Black Hole 4"),
+                           SKTexture(imageNamed: "Black Hole 5"),
+                           SKTexture(imageNamed: "Black Hole 6"),
+                           SKTexture(imageNamed: "Black Hole 7")]
     
-    let greenChargeUpImages = [SKTexture(image: UIImage(named: "Green Beam 1")!),
-                               SKTexture(image: UIImage(named: "Green Beam 2")!),
-                               SKTexture(image: UIImage(named: "Green Beam 3")!),
-                               SKTexture(image: UIImage(named: "Green Beam 4")!),
-                               SKTexture(image: UIImage(named: "Green Beam 5")!),
-                               SKTexture(image: UIImage(named: "Green Beam 6")!)]
+    let greenChargeUpImages = [SKTexture(imageNamed: "Green Beam 1"),
+                               SKTexture(imageNamed: "Green Beam 2"),
+                               SKTexture(imageNamed: "Green Beam 3"),
+                               SKTexture(imageNamed: "Green Beam 4"),
+                               SKTexture(imageNamed: "Green Beam 5"),
+                               SKTexture(imageNamed: "Green Beam 6")]
     
-    let scientistImages = [SKTexture(image: UIImage(named: "Scientist 1")!),
-                           SKTexture(image: UIImage(named: "Scientist 2")!)]
+    let scientistImages = [SKTexture(imageNamed: "Scientist 1"),
+                           SKTexture(imageNamed: "Scientist 2")]
     
-    let asteroidDestroyedImages = [SKTexture(image: UIImage(named: "Asteroid Hit 1")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 2")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 3")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 4")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 5")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 6")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 7")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 8")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 9")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 10")!),
-                                   SKTexture(image: UIImage(named: "Asteroid Hit 11")!)]
+    let asteroidDestroyedImages = [SKTexture(imageNamed: "Asteroid Hit 1"),
+                                   SKTexture(imageNamed: "Asteroid Hit 2"),
+                                   SKTexture(imageNamed: "Asteroid Hit 3"),
+                                   SKTexture(imageNamed: "Asteroid Hit 4"),
+                                   SKTexture(imageNamed: "Asteroid Hit 5"),
+                                   SKTexture(imageNamed: "Asteroid Hit 6"),
+                                   SKTexture(imageNamed: "Asteroid Hit 7"),
+                                   SKTexture(imageNamed: "Asteroid Hit 8"),
+                                   SKTexture(imageNamed: "Asteroid Hit 9"),
+                                   SKTexture(imageNamed: "Asteroid Hit 10"),
+                                   SKTexture(imageNamed: "Asteroid Hit 11")]
     
-    let cometDestroyedImages = [SKTexture(image: UIImage(named: "Comet Hit 1")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 2")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 3")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 4")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 5")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 6")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 7")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 8")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 9")!),
-                                SKTexture(image: UIImage(named: "Comet Hit 10")!)]
+    let cometDestroyedImages = [SKTexture(imageNamed: "Comet Hit 1"),
+                                SKTexture(imageNamed: "Comet Hit 2"),
+                                SKTexture(imageNamed: "Comet Hit 3"),
+                                SKTexture(imageNamed: "Comet Hit 4"),
+                                SKTexture(imageNamed: "Comet Hit 5"),
+                                SKTexture(imageNamed: "Comet Hit 6"),
+                                SKTexture(imageNamed: "Comet Hit 7"),
+                                SKTexture(imageNamed: "Comet Hit 8"),
+                                SKTexture(imageNamed: "Comet Hit 9"),
+                                SKTexture(imageNamed: "Comet Hit 10")]
     
-    let explosionImages = [SKTexture(image: UIImage(named: "Explosion 1")!),
-                           SKTexture(image: UIImage(named: "Explosion 2")!),
-                           SKTexture(image: UIImage(named: "Explosion 3")!),
-                           SKTexture(image: UIImage(named: "Explosion 4")!),
-                           SKTexture(image: UIImage(named: "Explosion 5")!),
-                           SKTexture(image: UIImage(named: "Explosion 6")!),
-                           SKTexture(image: UIImage(named: "Explosion 7")!),
-                           SKTexture(image: UIImage(named: "Explosion 8")!),
-                           SKTexture(image: UIImage(named: "Explosion 9")!),
-                           SKTexture(image: UIImage(named: "Explosion 10")!),
-                           SKTexture(image: UIImage(named: "Explosion 11")!),
-                           SKTexture(image: UIImage(named: "Explosion 12")!),
-                           SKTexture(image: UIImage(named: "Explosion 13")!),
-                           SKTexture(image: UIImage(named: "Explosion 14")!),
-                           SKTexture(image: UIImage(named: "Explosion 15")!)]
+    let explosionImages = [SKTexture(imageNamed: "Explosion 1"),
+                           SKTexture(imageNamed: "Explosion 2"),
+                           SKTexture(imageNamed: "Explosion 3"),
+                           SKTexture(imageNamed: "Explosion 4"),
+                           SKTexture(imageNamed: "Explosion 5"),
+                           SKTexture(imageNamed: "Explosion 6"),
+                           SKTexture(imageNamed: "Explosion 7"),
+                           SKTexture(imageNamed: "Explosion 8"),
+                           SKTexture(imageNamed: "Explosion 9"),
+                           SKTexture(imageNamed: "Explosion 10"),
+                           SKTexture(imageNamed: "Explosion 11"),
+                           SKTexture(imageNamed: "Explosion 12"),
+                           SKTexture(imageNamed: "Explosion 13"),
+                           SKTexture(imageNamed: "Explosion 14"),
+                           SKTexture(imageNamed: "Explosion 15")]
     
-    let cometExplosionImages = [SKTexture(image: UIImage(named: "Comet Explosion 1")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 2")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 3")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 4")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 5")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 6")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 7")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 8")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 9")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 10")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 11")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 12")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 13")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 14")!),
-                                SKTexture(image: UIImage(named: "Comet Explosion 15")!)]
+    let cometExplosionImages = [SKTexture(imageNamed: "Comet Explosion 1"),
+                                SKTexture(imageNamed: "Comet Explosion 2"),
+                                SKTexture(imageNamed: "Comet Explosion 3"),
+                                SKTexture(imageNamed: "Comet Explosion 4"),
+                                SKTexture(imageNamed: "Comet Explosion 5"),
+                                SKTexture(imageNamed: "Comet Explosion 6"),
+                                SKTexture(imageNamed: "Comet Explosion 7"),
+                                SKTexture(imageNamed: "Comet Explosion 8"),
+                                SKTexture(imageNamed: "Comet Explosion 9"),
+                                SKTexture(imageNamed: "Comet Explosion 10"),
+                                SKTexture(imageNamed: "Comet Explosion 11"),
+                                SKTexture(imageNamed: "Comet Explosion 12"),
+                                SKTexture(imageNamed: "Comet Explosion 13"),
+                                SKTexture(imageNamed: "Comet Explosion 14"),
+                                SKTexture(imageNamed: "Comet Explosion 15")]
     
     var isTVOn = false
     var isSetup = false
@@ -443,7 +443,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         var portrait = SKSpriteNode(imageNamed: "Scientist 1")
         
         if speaker == "System" {
-            let texture = SKTexture(image: UIImage(named: "System")!)
+            let texture = SKTexture(imageNamed: "System")
             texture.filteringMode = .nearest
             portrait = SKSpriteNode(texture: texture)
             portrait.position = CGPoint(x: (120 - deviceOffset / 2) - (deviceWidth / 2), y: 0)
@@ -766,7 +766,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func addAsteroid() {
-        let texture = SKTexture(image: UIImage(named: "Asteroid 1")!)
+        let texture = SKTexture(imageNamed: "Asteroid 1")
         texture.filteringMode = .nearest
         
         let asteroid = SKSpriteNode(texture: texture)
@@ -789,7 +789,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func addComet() {
-        let texture = SKTexture(image: UIImage(named: "Comet 1")!)
+        let texture = SKTexture(imageNamed: "Comet 1")
         texture.filteringMode = .nearest
         
         let comet = SKSpriteNode(texture: texture)
@@ -814,7 +814,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func addBlackHole() {
         isAlreadyBlackHole = true
-        let texture = SKTexture(image: UIImage(named: "Black Hole 1")!)
+        let texture = SKTexture(imageNamed: "Black Hole 1")
         texture.filteringMode = .nearest
         
         let blackHole = SKSpriteNode(texture: texture)
@@ -931,15 +931,23 @@ class StarSampleScene: SKScene {
     let deviceWidth = UIScreen.main.bounds.width
     let level = UserDefaults.standard.integer(forKey: "nextLevel")
     
-    let rocketImages = [SKTexture(image: UIImage(named: "Rocket 1")!),
-                        SKTexture(image: UIImage(named: "Rocket 2")!),
-                        SKTexture(image: UIImage(named: "Rocket 3")!),
-                        SKTexture(image: UIImage(named: "Rocket 4")!),
-                        SKTexture(image: UIImage(named: "Rocket 3A")!),
-                        SKTexture(image: UIImage(named: "Rocket 5")!),
-                        SKTexture(image: UIImage(named: "Rocket 6")!)]
+    let rocketImages = [SKTexture(imageNamed: "Rocket 1"),
+                        SKTexture(imageNamed: "Rocket 2"),
+                        SKTexture(imageNamed: "Rocket 3"),
+                        SKTexture(imageNamed: "Rocket 4"),
+                        SKTexture(imageNamed: "Rocket 3A"),
+                        SKTexture(imageNamed: "Rocket 5"),
+                        SKTexture(imageNamed: "Rocket 6")]
+    
+    var beamImages = [SKTexture]()
     
     override func didMove(to view: SKView) {
+        
+        var starMultiplier = CGFloat(20)
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            starMultiplier = 10
+        }
         
         self.backgroundColor = .clear
         self.view?.allowsTransparency = true
@@ -952,8 +960,8 @@ class StarSampleScene: SKScene {
         
         let protagonist = SKSpriteNode(imageNamed: "Rocket 1")
         
-        protagonist.size = CGSize(width: 72, height: 120)
-        protagonist.position = CGPoint(x: (deviceWidth / 2) + 100, y: deviceHeight / 2)
+        protagonist.size = CGSize(width: 108, height: 180)
+        protagonist.position = CGPoint(x: 230 + (starMultiplier * 12), y: deviceHeight / 2)
         protagonist.zRotation = .pi / 2
         
         let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: rocketImages, timePerFrame: 0.1))
@@ -964,20 +972,46 @@ class StarSampleScene: SKScene {
         var starName = ""
         
         switch level {
-        case 1: starName = "Red Star"
-        case 2: starName = "Yellow Star"
-        case 3: starName = "Blue Star"
+        case 1:
+            starName = "Red Star"
+            beamImages = [SKTexture(imageNamed: "Red Sample 1"),
+                          SKTexture(imageNamed: "Red Sample 2")]
+            
+        case 2:
+            starName = "Yellow Star"
+            beamImages = [SKTexture(imageNamed: "Yellow Sample 1"),
+                          SKTexture(imageNamed: "Yellow Sample 2")]
+            
+        case 3:
+            starName = "Blue Star"
+            beamImages = [SKTexture(imageNamed: "Blue Sample 1"),
+                          SKTexture(imageNamed: "Blue Sample 2")]
+            
         default: break
         }
         
-        let texture = SKTexture(image: UIImage(named: starName)!)
+        for image in beamImages {
+            image.filteringMode = .nearest
+        }
+        
+        let texture = SKTexture(imageNamed: starName)
         texture.filteringMode = .nearest
         let star = SKSpriteNode(texture: texture)
         
-        star.size = CGSize(width: 144, height: 288)
-        star.position = CGPoint(x: 72, y: deviceHeight / 2)
+        star.size = CGSize(width: 24 * starMultiplier, height: 48 * starMultiplier)
+        star.position = CGPoint(x: 144, y: deviceHeight / 2)
         
         self.addChild(star)
+        
+        let beam = SKSpriteNode(texture: beamImages.first)
+        
+        beam.size = CGSize(width: 66, height: 60)
+        beam.position = CGPoint(x: 90 + (starMultiplier * 12), y: deviceHeight / 2)
+        
+        let beamAnimation = SKAction.repeatForever(SKAction.animate(with: beamImages, timePerFrame: 0.3))
+        beam.run(beamAnimation)
+        
+        self.addChild(beam)
     }
     
 }
