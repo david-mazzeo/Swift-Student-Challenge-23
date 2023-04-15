@@ -36,10 +36,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
         UserDefaults.standard.set(1, forKey: "nextLevel")
         
         // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
-//        vc.modalPresentationStyle = .fullScreen
-//        self.present(vc, animated: true, completion: nil)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true, completion: nil)
         // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
         
         UIView.animate(withDuration: 1, animations: { [self] in
@@ -164,13 +164,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
         cloudOne.layer.magnificationFilter = .nearest
         cloudTwo.layer.magnificationFilter = .nearest
         
-        // MARK: Cloud Cover
-        initTimer()
-        
         // MARK: Begins passing time.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
             cycleTime(time: .Evening)
         }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         
     }
     
@@ -183,10 +183,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         })
         
         timer.fire()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        timer.invalidate()
     }
     
     override func viewDidLayoutSubviews() {
@@ -295,6 +291,15 @@ class ViewController: UIViewController, CAAnimationDelegate {
                                      green: 43/255,
                                      blue: 107/255, alpha: 1)]
         }
+    }
+    
+    @objc func applicationWillResignActive(notification: NSNotification) {
+        timer.invalidate()
+        cloudView.layer.removeAllAnimations()
+    }
+    
+    @objc func applicationDidBecomeActive(notification: NSNotification) {
+        initTimer()
     }
     
 }

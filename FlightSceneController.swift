@@ -135,6 +135,13 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     let topPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.top ?? 0
     let bottomPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.bottom ?? 0
     
+    deinit {
+        print("DEINITIALISED")
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("fire"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("released"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("finishLevel"), object: nil)
+    }
+    
     override func didMove(to view: SKView) {
         
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
@@ -203,7 +210,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
             let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
-            print(xAxis)
             if isSetup {
                 protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + forceModifier, dy: 0))
             }
@@ -337,6 +343,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func displayTV(dialogue: String, speaker: String) {
+        
+        print(dialogue)
+        
         var deviceOffset = CGFloat(0)
         var speakerFontSize = CGFloat(30)
         var dialogueFontSize = CGFloat(18)
@@ -416,6 +425,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func hideTV(complete: (() -> Void)? = nil) {
+        
+        print("-----")
+        
         if isTVOn {
             let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
             let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
@@ -579,6 +591,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     }
                 })
             } else {
+                isRoundFinished = true
+                motionEngine.stopAccelerometerUpdates()
+                motionEngine.stopGyroUpdates()
                 
                 protagonist.run(SKAction.sequence([
                     SKAction.animate(with: rocketDestroyedImages, timePerFrame: 1/36),

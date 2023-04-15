@@ -52,6 +52,15 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("switchViews"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("asteroidHit"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("lifeModified"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("startLevel"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("restartLevel"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -111,6 +120,7 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func switchViews(_ notification: Notification) {
+        print("Switched")
         if !isEliminated {
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 hideElements()
@@ -168,6 +178,8 @@ class SpaceFlightController: UIViewController {
         elapsedButton.configuration?.attributedTitle = AttributedString("0%", attributes: HUDAttributes)
         destroyedButton.configuration?.attributedTitle = AttributedString("0", attributes: HUDAttributes)
         livesButton.configuration?.attributedTitle = AttributedString("3", attributes: HUDAttributes)
+        
+        animationTimer.invalidate()
         
         objectsHit = 0
         livesRemaining = 3
