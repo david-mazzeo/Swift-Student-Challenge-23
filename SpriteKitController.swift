@@ -18,7 +18,9 @@ class SpaceFlightController: UIViewController {
     var durationTimer = Timer()
     var currentView = "Game"
     var isEliminated = false
+    var isPaused = false
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
+    var percentElapsed = 0
     
     @IBOutlet weak var backgroundView: UIView!
     var spriteKitView = SKView()
@@ -59,10 +61,13 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("startLevel"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("restartLevel"), object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        print("DIDLOAD")
         
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
         let topPadding = (window?.safeAreaInsets.top ?? 0)
@@ -78,6 +83,7 @@ class SpaceFlightController: UIViewController {
         spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(switchViews(_:)), name: Notification.Name("switchViews"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(hitObject(_:)), name: Notification.Name("asteroidHit"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
@@ -120,8 +126,9 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func switchViews(_ notification: Notification) {
-        print("Switched")
+        print("FIRED")
         if !isEliminated {
+            print("LOADING")
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 hideElements()
                 
@@ -135,6 +142,9 @@ class SpaceFlightController: UIViewController {
                 if currentView == "Game" {
                     spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
                     currentView = "Sample"
+                } else if UserDefaults.standard.integer(forKey: "nextLevel") == 4 {
+                    spriteKitView.presentScene(EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                    currentView = "Encounter"
                 } else {
                     spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
                     currentView = "Game"
@@ -149,7 +159,6 @@ class SpaceFlightController: UIViewController {
     
     func hideElements() {
         spriteKitView.alpha = 0
-        
         backgroundView.alpha = 0
         
         elementOneButton.alpha = 0
@@ -180,9 +189,13 @@ class SpaceFlightController: UIViewController {
         livesButton.configuration?.attributedTitle = AttributedString("3", attributes: HUDAttributes)
         
         animationTimer.invalidate()
+        durationTimer.invalidate()
+        percentElapsed = 0
         
         objectsHit = 0
         livesRemaining = 3
+        
+        isEliminated = false
         
         spriteKitView.scene?.removeAllActions()
         spriteKitView.scene?.removeAllChildren()
@@ -197,6 +210,7 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func startLevel(_ notification: Notification) {
+        print("eee")
         animateBackground()
         
         var duration = Double(0)
@@ -208,17 +222,16 @@ class SpaceFlightController: UIViewController {
         default: break
         }
         
-        isEliminated = false
-        var percentElapsed = 0
-        
         durationTimer = Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
-            percentElapsed += 1
-            elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
-            
-            if percentElapsed >= 100 {
-                NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
-                animationTimer.invalidate()
-                timer.invalidate()
+            if !isPaused {
+                percentElapsed += 1
+                elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
+                
+                if percentElapsed >= 100 {
+                    NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
+                    animationTimer.invalidate()
+                    timer.invalidate()
+                }
             }
         })
     }
@@ -252,9 +265,16 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func applicationWillResignActive(notification: NSNotification) {
+        spriteKitView.isPaused = true
+        isPaused = true
         NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
         elementOneButton.isEnabled = true
         elementTwoButton.isEnabled = true
+    }
+    
+    @objc func applicationDidBecomeActive(notification: NSNotification) {
+        spriteKitView.isPaused = false
+        isPaused = false
     }
     
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {

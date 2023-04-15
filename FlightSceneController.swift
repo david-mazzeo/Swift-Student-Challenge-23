@@ -123,9 +123,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     var forceModifier = Double(0)
     var motionEngine = CMMotionManager()
     
-    let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
     let protagonist = SKSpriteNode(imageNamed: "Rocket 1.png")
-    let croppedFrame = SKCropNode()
     let beam = SKShapeNode()
     let level = UserDefaults.standard.integer(forKey: "nextLevel")
     
@@ -143,6 +141,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didMove(to view: SKView) {
+        
+        print("INITIALISED")
         
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
@@ -344,7 +344,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func displayTV(dialogue: String, speaker: String) {
         
-        print(dialogue)
+        let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
+        let croppedFrame = SKCropNode()
         
         var deviceOffset = CGFloat(0)
         var speakerFontSize = CGFloat(30)
@@ -364,12 +365,14 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             systemSize = CGSize(width: 86, height: 82)
         }
         
+        TVScreen.name = "TV Frame"
         TVScreen.size = CGSize(width: 20, height: 20)
         TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
         
         let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
         croppedTV.size = TVScreen.size
         
+        croppedFrame.name = "TV Content"
         croppedFrame.maskNode = croppedTV
         croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
         
@@ -426,21 +429,27 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     func hideTV(complete: (() -> Void)? = nil) {
         
-        print("-----")
-        
         if isTVOn {
             let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
             let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
             
-            TVScreen.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
-            croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
-                croppedFrame.removeAllChildren()
-                croppedFrame.removeFromParent()
-                
-                if complete != nil {
-                    complete!()
+            for child in self.children {
+                if child.name == "TV Frame" {
+                    child.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
                 }
-            }]))
+                
+                if child.name == "TV Content" {
+                    (child as! SKCropNode).maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run {
+                        child.removeAllChildren()
+                        child.removeFromParent()
+                        
+                        if complete != nil {
+                            complete!()
+                        }
+                    }]))
+                }
+            }
+            
         }
     }
     
@@ -759,13 +768,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         if 0...5 ~= randomNumber {
             addAsteroid()
-            print("asteroid \(randomNumber)")
         } else if 5...10 ~= randomNumber {
             addComet()
-            print("comet \(randomNumber)")
         } else {
             addBlackHole()
-            print("black hole \(randomNumber)")
         }
     }
     

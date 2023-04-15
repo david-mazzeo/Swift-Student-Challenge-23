@@ -174,6 +174,11 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+    }
+    
     func initTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 100, repeats: true, block: { [self] timer in
             cloudView.transform = CGAffineTransform(translationX: 0, y: 0)

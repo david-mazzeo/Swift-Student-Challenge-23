@@ -14,9 +14,6 @@ class StarSampleScene: SKScene {
     let topPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.top ?? 0
     let level = UserDefaults.standard.integer(forKey: "nextLevel")
     
-    let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
-    let croppedFrame = SKCropNode()
-    
     let rocketImages = [SKTexture(imageNamed: "Rocket 1"),
                         SKTexture(imageNamed: "Rocket 2"),
                         SKTexture(imageNamed: "Rocket 3"),
@@ -98,6 +95,8 @@ class StarSampleScene: SKScene {
                           SKTexture(imageNamed: "Blue Sample 3"),
                           SKTexture(imageNamed: "Blue Sample 4")]
             
+            UserDefaults.standard.set(4, forKey: "nextLevel")
+            
         default: break
         }
         
@@ -145,6 +144,7 @@ class StarSampleScene: SKScene {
                          hideTV()
                          
                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                         print("????")
                          NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
                      }
                      }
@@ -154,6 +154,10 @@ class StarSampleScene: SKScene {
     }
     
     func displayTV(dialogue: String, speaker: String) {
+        
+        let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
+        let croppedFrame = SKCropNode()
+        
         var deviceOffset = CGFloat(0)
         var speakerFontSize = CGFloat(30)
         var dialogueFontSize = CGFloat(18)
@@ -172,12 +176,14 @@ class StarSampleScene: SKScene {
             systemSize = CGSize(width: 86, height: 82)
         }
         
+        TVScreen.name = "TV Frame"
         TVScreen.size = CGSize(width: 20, height: 20)
         TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
         
         let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
         croppedTV.size = TVScreen.size
-        
+
+        croppedFrame.name = "TV Content"
         croppedFrame.maskNode = croppedTV
         croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
         
@@ -236,15 +242,22 @@ class StarSampleScene: SKScene {
         let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
         let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
         
-        TVScreen.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
-        croppedFrame.maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run { [self] in
-            croppedFrame.removeAllChildren()
-            croppedFrame.removeFromParent()
-            
-            if complete != nil {
-                complete!()
+        for child in self.children {
+            if child.name == "TV Frame" {
+                child.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
             }
-        }]))
+            
+            if child.name == "TV Content" {
+                (child as! SKCropNode).maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run {
+                    child.removeAllChildren()
+                    child.removeFromParent()
+                    
+                    if complete != nil {
+                        complete!()
+                    }
+                }]))
+            }
+        }
     }
     
 }
