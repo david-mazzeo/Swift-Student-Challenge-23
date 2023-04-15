@@ -1,199 +1,12 @@
 //
-//  SpaceFlightController.swift
+//  FlightSceneController.swift
 //  Constellation Explorer
 //
-//  Created by David Mazzeo on 6/4/2023.
+//  Created by David Mazzeo on 15/4/2023.
 //
 
-import UIKit
 import SpriteKit
 import CoreMotion
-
-var objectsHit = 0
-var livesRemaining = 3
-
-class SpaceFlightController: UIViewController {
-    
-    let gradient = CAGradientLayer()
-    var animationTimer = Timer()
-    var currentView = "Game"
-    let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
-    
-    @IBOutlet weak var backgroundView: UIView!
-    var spriteKitView = SKView()
-    
-    @IBOutlet weak var elementOneButton: UIButton!
-    @IBOutlet weak var elementTwoButton: UIButton!
-    
-    @IBOutlet weak var bottomBackgroundConstraint: NSLayoutConstraint!
-    
-    @IBOutlet weak var livesButton: UIButton!
-    @IBOutlet weak var destroyedButton: UIButton!
-    @IBOutlet weak var elapsedButton: UIButton!
-    
-    @IBAction func elementOneFire(_ sender: Any) {
-        elementTwoButton.isEnabled = false
-        NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 1])
-    }
-    
-    @IBAction func elementOneReleased(_ sender: Any) {
-        elementTwoButton.isEnabled = true
-        NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
-    }
-    
-    @IBAction func elementTwoFire(_ sender: Any) {
-        elementOneButton.isEnabled = false
-        NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 2])
-    }
-    
-    @IBAction func elementTwoReleased(_ sender: Any) {
-        elementOneButton.isEnabled = true
-        NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
-        let topPadding = (window?.safeAreaInsets.top ?? 0)
-        
-        gradient.frame = CGRect(x: 0, y: -topPadding, width: view.bounds.width, height: view.bounds.height + topPadding)
-        gradient.colors = [UIColor.black.cgColor, UIColor.init(red: 0, green: 27/255, blue: 54/255, alpha: 1).cgColor]
-
-        self.view.layer.insertSublayer(gradient, at: 0)
-        
-        self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
-        
-        initSK()
-        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(switchViews(_:)), name: Notification.Name("switchViews"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(hitObject(_:)), name: Notification.Name("asteroidHit"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(startLevel(_:)), name: Notification.Name("startLevel"), object: nil)
-        
-    }
-    
-    func animateBackground() {
-        let patternHeight = -(444 * UIScreen.main.scale)
-        bottomBackgroundConstraint.constant = patternHeight
-        
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [self] timer in
-            backgroundView.transform = CGAffineTransform(translationX: 0, y: patternHeight)
-            UIView.animate(withDuration: 30, delay: 0, options: [.curveLinear], animations: { [self] in
-                backgroundView.transform = CGAffineTransform(translationX: 0, y: 0)
-            })
-        })
-        
-        animationTimer.fire()
-    }
-    
-    @objc func switchViews(_ notification: Notification) {
-        UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
-            spriteKitView.alpha = 0
-            
-            backgroundView.alpha = 0
-            
-            elementOneButton.alpha = 0
-            elementTwoButton.alpha = 0
-            
-            livesButton.alpha = 0
-            destroyedButton.alpha = 0
-            elapsedButton.alpha = 0
-            
-        }, completion: { [self] (finished: Bool) in
-            backgroundView.layer.removeAllAnimations()
-            cleanSK()
-            
-            initSK()
-            spriteKitView.alpha = 0
-            
-            if currentView == "Game" {
-                spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-                currentView = "Sample"
-            } else {
-                spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-                currentView = "Game"
-            }
-            
-            UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
-                backgroundView.alpha = 1
-                spriteKitView.alpha = 1
-                
-                if currentView == "Game" {
-                    elementOneButton.alpha = 1
-                    elementTwoButton.alpha = 1
-                    
-                    livesButton.alpha = 1
-                    destroyedButton.alpha = 1
-                    elapsedButton.alpha = 1
-                }
-            })
-        })
-    }
-    
-    func cleanSK() {
-        elapsedButton.configuration?.attributedTitle = AttributedString("0%", attributes: HUDAttributes)
-        destroyedButton.configuration?.attributedTitle = AttributedString("0", attributes: HUDAttributes)
-        livesButton.configuration?.attributedTitle = AttributedString("3", attributes: HUDAttributes)
-        
-        objectsHit = 0
-        livesRemaining = 3
-        
-        spriteKitView.scene?.removeAllActions()
-        spriteKitView.scene?.removeAllChildren()
-        spriteKitView.scene?.removeFromParent()
-        spriteKitView.presentScene(nil)
-        spriteKitView.removeFromSuperview()
-    }
-    
-    func initSK() {
-        spriteKitView = SKView(frame: CGRect(x: 0, y: -100, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height + 200))
-        self.view.insertSubview(spriteKitView, at: 2)
-    }
-    
-    @objc func startLevel(_ notification: Notification) {
-        animateBackground()
-        
-        var duration = Double(0)
-        
-        switch UserDefaults.standard.integer(forKey: "nextLevel") {
-        case 1: duration = 15
-        case 2: duration = 20
-        case 3: duration = 30
-        default: break
-        }
-        
-        var percentElapsed = 0
-        
-        Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
-            percentElapsed += 1
-            elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
-            
-            if percentElapsed >= 100 {
-                NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
-                animationTimer.invalidate()
-                timer.invalidate()
-            }
-        })
-    }
-    
-    @objc func hitObject(_ notification: Notification) {
-        destroyedButton.configuration?.attributedTitle = AttributedString(String(objectsHit), attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
-    }
-    
-    @objc func lifeLost(_ notification: Notification) {
-        livesButton.configuration?.attributedTitle = AttributedString(String(livesRemaining), attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
-    }
-    
-    @objc func applicationWillResignActive(notification: NSNotification) {
-        NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
-        elementOneButton.isEnabled = true
-        elementTwoButton.isEnabled = true
-    }
-    
-}
 
 class FlightScene: SKScene, SKPhysicsContactDelegate {
     
@@ -287,6 +100,19 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                                 SKTexture(imageNamed: "Comet Explosion 14"),
                                 SKTexture(imageNamed: "Comet Explosion 15")]
     
+    let rocketDestroyedImages = [SKTexture(imageNamed: "Rocket Hit 1"),
+                                 SKTexture(imageNamed: "Rocket Hit 2"),
+                                 SKTexture(imageNamed: "Rocket Hit 3"),
+                                 SKTexture(imageNamed: "Rocket Hit 4"),
+                                 SKTexture(imageNamed: "Rocket Hit 5"),
+                                 SKTexture(imageNamed: "Rocket Hit 6"),
+                                 SKTexture(imageNamed: "Rocket Hit 7"),
+                                 SKTexture(imageNamed: "Rocket Hit 8"),
+                                 SKTexture(imageNamed: "Rocket Hit 9"),
+                                 SKTexture(imageNamed: "Rocket Hit 10"),
+                                 SKTexture(imageNamed: "Rocket Hit 11"),
+                                 SKTexture(imageNamed: "Rocket Hit 12")]
+    
     var isTVOn = false
     var isSetup = false
     var isBeamActive = false
@@ -359,6 +185,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         for image in blackHoleImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in rocketDestroyedImages {
             image.filteringMode = .nearest
         }
         
@@ -717,35 +547,72 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             livesRemaining -= 1
             NotificationCenter.default.post(Notification(name: Notification.Name("lifeModified")))
             
-            if !isTVOn {
-                isTVOn = true
-                displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
+            healthEvents = false
+            if livesRemaining > 0 {
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                if !isTVOn {
+                    isTVOn = true
+                    displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                        hideTV(complete: { [self] in
+                            isTVOn = false
+                        })
+                    }
+                }
+                
+                var timerCount = 0
+                
+                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [self] timer in
+                    if timerCount == 10 {
+                        timer.invalidate()
+                        protagonist.isHidden = false
+                        healthEvents = true
+                    } else {
+                        if protagonist.isHidden {
+                            protagonist.isHidden = false
+                        } else {
+                            protagonist.isHidden = true
+                        }
+                        
+                        timerCount += 1
+                    }
+                })
+            } else {
+                
+                protagonist.run(SKAction.sequence([
+                    SKAction.animate(with: rocketDestroyedImages, timePerFrame: 1/36),
+                    SKAction.removeFromParent()]))
+                
+                if isTVOn {
                     hideTV(complete: { [self] in
                         isTVOn = false
                     })
-                }
-            }
-            
-            healthEvents = false
-            var timerCount = 0
-            
-            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [self] timer in
-                if timerCount == 10 {
-                    timer.invalidate()
-                    protagonist.isHidden = false
-                    healthEvents = true
-                } else {
-                    if protagonist.isHidden {
-                        protagonist.isHidden = false
-                    } else {
-                        protagonist.isHidden = true
-                    }
                     
-                    timerCount += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                        displayTV(dialogue: pickEliminatedDialogue(), speaker: "Scientist")
+                        
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                        hideTV()
+                        
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
+                    }
+                    }
+                    }
+                } else {
+                    displayTV(dialogue: pickEliminatedDialogue(), speaker: "Scientist")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
+                        hideTV()
+                        
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
+                    }
+                    }
                 }
-            })
+                
+            }
         }
     }
     
@@ -763,10 +630,22 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         case 2: return "Hey, are you ok?! You have \(livesRemaining) \(livesText) left!"
         case 3: return "Uh-oh, is everything alright? \(livesRemaining) \(livesText) remaining."
         case 4: return "\(livesRemaining) \(livesText) remaining, break some stuff to get them back!"
-        default: break
+        default: return ""
         }
         
-        return ""
+    }
+    
+    func pickEliminatedDialogue() -> String {
+        let randomNumber = Int.random(in: 0 ..< 5)
+        
+        switch randomNumber {
+        case 0: return "We failed after all..."
+        case 1: return "Hey! Are you there?!"
+        case 2: return "No!..."
+        case 3: return "It can't be..."
+        case 4: return "Hello?! Do you read me?!"
+        default: return ""
+        }
     }
     
     @objc func finishLevel(_ notification: Notification) {
@@ -804,16 +683,25 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         
+        var dialogue = ""
+        
+        switch level {
+        case 1: dialogue = "Nice work! Now to grab a sample of that star..."
+        case 2: dialogue = "Great work! Let's grab that sample."
+        case 3: dialogue = "All done! You know what to do from here."
+        default: break
+        }
+        
         if isTVOn {
             hideTV(complete: { [self] in
                 isTVOn = false
             })
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                displayTV(dialogue: "Nice work! Now to grab a sample of that star...", speaker: "Scientist")
+                displayTV(dialogue: dialogue, speaker: "Scientist")
             }
         } else {
-            displayTV(dialogue: "Nice work! Now to grab a sample of that star...", speaker: "Scientist")
+            displayTV(dialogue: dialogue, speaker: "Scientist")
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
