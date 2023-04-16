@@ -72,28 +72,28 @@ class StarSampleScene: SKScene {
         switch level {
         case 1:
             starName = "Red Star"
-            beamImages = [SKTexture(imageNamed: "Red Sample 1"),
-                          SKTexture(imageNamed: "Red Sample 2"),
-                          SKTexture(imageNamed: "Red Sample 3"),
-                          SKTexture(imageNamed: "Red Sample 4")]
+            beamImages = [SKTexture(imageNamed: "Red Beam 1"),
+                          SKTexture(imageNamed: "Red Beam 2"),
+                          SKTexture(imageNamed: "Red Beam 3"),
+                          SKTexture(imageNamed: "Red Beam 4")]
             
             UserDefaults.standard.set(2, forKey: "nextLevel")
             
         case 2:
             starName = "Yellow Star"
-            beamImages = [SKTexture(imageNamed: "Yellow Sample 1"),
-                          SKTexture(imageNamed: "Yellow Sample 2"),
-                          SKTexture(imageNamed: "Yellow Sample 3"),
-                          SKTexture(imageNamed: "Yellow Sample 4")]
+            beamImages = [SKTexture(imageNamed: "Yellow Beam 1"),
+                          SKTexture(imageNamed: "Yellow Beam 2"),
+                          SKTexture(imageNamed: "Yellow Beam 3"),
+                          SKTexture(imageNamed: "Yellow Beam 4")]
             
             UserDefaults.standard.set(3, forKey: "nextLevel")
             
         case 3:
             starName = "Blue Star"
-            beamImages = [SKTexture(imageNamed: "Blue Sample 1"),
-                          SKTexture(imageNamed: "Blue Sample 2"),
-                          SKTexture(imageNamed: "Blue Sample 3"),
-                          SKTexture(imageNamed: "Blue Sample 4")]
+            beamImages = [SKTexture(imageNamed: "Blue Beam 1"),
+                          SKTexture(imageNamed: "Blue Beam 2"),
+                          SKTexture(imageNamed: "Blue Beam 3"),
+                          SKTexture(imageNamed: "Blue Beam 4")]
             
             UserDefaults.standard.set(4, forKey: "nextLevel")
             
@@ -144,120 +144,12 @@ class StarSampleScene: SKScene {
                          hideTV()
                          
                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                         print("????")
                          NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
                      }
                      }
                      }
                      }
                  }]))
-    }
-    
-    func displayTV(dialogue: String, speaker: String) {
-        
-        let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
-        let croppedFrame = SKCropNode()
-        
-        var deviceOffset = CGFloat(0)
-        var speakerFontSize = CGFloat(30)
-        var dialogueFontSize = CGFloat(18)
-        var offsetToCenter = CGFloat(60)
-        var labelOffset = CGFloat(-10)
-        var scientistSize = CGSize(width: 120, height: 162)
-        var systemSize = CGSize(width: 107.5, height: 102.5)
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            deviceOffset = 50
-            speakerFontSize = 16
-            dialogueFontSize = 12
-            offsetToCenter = 40
-            labelOffset = -5
-            scientistSize = CGSize(width: 100, height: 135)
-            systemSize = CGSize(width: 86, height: 82)
-        }
-        
-        TVScreen.name = "TV Frame"
-        TVScreen.size = CGSize(width: 20, height: 20)
-        TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
-        
-        let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
-        croppedTV.size = TVScreen.size
-
-        croppedFrame.name = "TV Content"
-        croppedFrame.maskNode = croppedTV
-        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
-        
-        var portrait = SKSpriteNode(imageNamed: "Scientist 1")
-        
-        if speaker == "System" {
-            let texture = SKTexture(imageNamed: "System")
-            texture.filteringMode = .nearest
-            portrait = SKSpriteNode(texture: texture)
-            portrait.position = CGPoint(x: (120 - deviceOffset / 2) - (deviceWidth / 2), y: 0)
-            portrait.size = systemSize
-        } else {
-            let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
-            portrait.run(portraitAnimation)
-            portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
-            portrait.size = scientistSize
-        }
-        
-        
-        var speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold)
-        
-        if #available(iOS 16.0, *) {
-            speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold, width: UIFont.Width(rawValue: 1))
-        }
-        
-        let speakerLabel = SKLabelNode(attributedText: NSAttributedString(string: speaker, attributes: [.font: speakerFont, .foregroundColor: UIColor.green]))
-        speakerLabel.horizontalAlignmentMode = .left
-        
-        let dialogueFont = UIFont.systemFont(ofSize: dialogueFontSize, weight: .regular)
-        
-        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: dialogue, attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
-        dialogueLabel.horizontalAlignmentMode = .left
-        dialogueLabel.verticalAlignmentMode = .top
-        dialogueLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
-        dialogueLabel.numberOfLines = 0
-        dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
-        
-        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2) - (deviceOffset / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - offsetToCenter) / 2)
-        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: labelOffset), in: speakerLabel)]
-        
-        croppedFrame.addChild(portrait)
-        croppedFrame.addChild(speakerLabel)
-        croppedFrame.addChild(dialogueLabel)
-        
-        self.addChild(TVScreen)
-        self.addChild(croppedFrame)
-        
-        let firstGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.1)
-        let secondGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 200 - deviceOffset, duration: 0.2)
-        
-        TVScreen.run(SKAction.sequence([firstGrow, secondGrow]))
-        croppedFrame.maskNode!.run(SKAction.sequence([firstGrow, secondGrow]))
-    }
-    
-    func hideTV(complete: (() -> Void)? = nil) {
-        let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
-        let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
-        
-        for child in self.children {
-            if child.name == "TV Frame" {
-                child.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
-            }
-            
-            if child.name == "TV Content" {
-                (child as! SKCropNode).maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run {
-                    child.removeAllChildren()
-                    child.removeFromParent()
-                    
-                    if complete != nil {
-                        complete!()
-                    }
-                }]))
-            }
-        }
     }
     
 }

@@ -172,6 +172,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         
+        if #available(iOS 16.0, *) {
+            guard let windowScene = view.window?.windowScene else { return }
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
+                print(error)
+            }
+        }
+
+        
     }
     
     deinit {

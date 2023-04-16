@@ -35,15 +35,12 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                            SKTexture(imageNamed: "Black Hole 6"),
                            SKTexture(imageNamed: "Black Hole 7")]
     
-    let greenChargeUpImages = [SKTexture(imageNamed: "Green Beam 1"),
-                               SKTexture(imageNamed: "Green Beam 2"),
-                               SKTexture(imageNamed: "Green Beam 3"),
-                               SKTexture(imageNamed: "Green Beam 4"),
-                               SKTexture(imageNamed: "Green Beam 5"),
-                               SKTexture(imageNamed: "Green Beam 6")]
-    
-    let scientistImages = [SKTexture(imageNamed: "Scientist 1"),
-                           SKTexture(imageNamed: "Scientist 2")]
+    let greenChargeUpImages = [SKTexture(imageNamed: "Green Charge 1"),
+                               SKTexture(imageNamed: "Green Charge 2"),
+                               SKTexture(imageNamed: "Green Charge 3"),
+                               SKTexture(imageNamed: "Green Charge 4"),
+                               SKTexture(imageNamed: "Green Charge 5"),
+                               SKTexture(imageNamed: "Green Charge 6")]
     
     let asteroidDestroyedImages = [SKTexture(imageNamed: "Asteroid Hit 1"),
                                    SKTexture(imageNamed: "Asteroid Hit 2"),
@@ -134,7 +131,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     let bottomPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.bottom ?? 0
     
     deinit {
-        print("DEINITIALISED")
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("released"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("finishLevel"), object: nil)
@@ -142,12 +138,11 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
         
-        print("INITIALISED")
-        
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(finishLevel(_:)), name: Notification.Name("finishLevel"), object: nil)
         
+        self.scene?.name = "Game"
         self.backgroundColor = .clear
         self.view?.allowsTransparency = true
         self.view?.backgroundColor = .clear
@@ -160,10 +155,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         for image in greenChargeUpImages {
-            image.filteringMode = .nearest
-        }
-        
-        for image in scientistImages {
             image.filteringMode = .nearest
         }
         
@@ -287,7 +278,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                         hideTV()
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                            displayTV(dialogue: "Comets are present in this area. Fire at them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
+                            displayTV(dialogue: "Comets are present in this area. Melt them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
                                 hideTV(complete: { [self] in
@@ -337,120 +328,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     }
                 }
             }
-            
         })
-        
-    }
-    
-    func displayTV(dialogue: String, speaker: String) {
-        
-        let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
-        let croppedFrame = SKCropNode()
-        
-        var deviceOffset = CGFloat(0)
-        var speakerFontSize = CGFloat(30)
-        var dialogueFontSize = CGFloat(18)
-        var offsetToCenter = CGFloat(60)
-        var labelOffset = CGFloat(-10)
-        var scientistSize = CGSize(width: 120, height: 162)
-        var systemSize = CGSize(width: 107.5, height: 102.5)
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            deviceOffset = 50
-            speakerFontSize = 16
-            dialogueFontSize = 12
-            offsetToCenter = 40
-            labelOffset = -5
-            scientistSize = CGSize(width: 100, height: 135)
-            systemSize = CGSize(width: 86, height: 82)
-        }
-        
-        TVScreen.name = "TV Frame"
-        TVScreen.size = CGSize(width: 20, height: 20)
-        TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
-        
-        let croppedTV = SKSpriteNode(imageNamed: "CRT Shape")
-        croppedTV.size = TVScreen.size
-        
-        croppedFrame.name = "TV Content"
-        croppedFrame.maskNode = croppedTV
-        croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
-        
-        var portrait = SKSpriteNode(imageNamed: "Scientist 1")
-        
-        if speaker == "System" {
-            let texture = SKTexture(imageNamed: "System")
-            texture.filteringMode = .nearest
-            portrait = SKSpriteNode(texture: texture)
-            portrait.position = CGPoint(x: (120 - deviceOffset / 2) - (deviceWidth / 2), y: 0)
-            portrait.size = systemSize
-        } else {
-            let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
-            portrait.run(portraitAnimation)
-            portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
-            portrait.size = scientistSize
-        }
-        
-        
-        var speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold)
-        
-        if #available(iOS 16.0, *) {
-            speakerFont = UIFont.systemFont(ofSize: speakerFontSize, weight: .bold, width: UIFont.Width(rawValue: 1))
-        }
-        
-        let speakerLabel = SKLabelNode(attributedText: NSAttributedString(string: speaker, attributes: [.font: speakerFont, .foregroundColor: UIColor.green]))
-        speakerLabel.horizontalAlignmentMode = .left
-        
-        let dialogueFont = UIFont.systemFont(ofSize: dialogueFontSize, weight: .regular)
-        
-        let dialogueLabel = SKLabelNode(attributedText: NSAttributedString(string: dialogue, attributes: [.font: dialogueFont, .foregroundColor: UIColor.green]))
-        dialogueLabel.horizontalAlignmentMode = .left
-        dialogueLabel.verticalAlignmentMode = .top
-        dialogueLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
-        dialogueLabel.numberOfLines = 0
-        dialogueLabel.preferredMaxLayoutWidth = deviceWidth - 240
-        
-        speakerLabel.position = CGPoint(x: 190 - (deviceWidth / 2) - (deviceOffset / 2), y: (speakerLabel.frame.height + 10 + dialogueLabel.frame.height - offsetToCenter) / 2)
-        dialogueLabel.constraints = [SKConstraint.distance(SKRange(constantValue: 0), to: CGPoint(x: 0, y: labelOffset), in: speakerLabel)]
-        
-        croppedFrame.addChild(portrait)
-        croppedFrame.addChild(speakerLabel)
-        croppedFrame.addChild(dialogueLabel)
-        
-        self.addChild(TVScreen)
-        self.addChild(croppedFrame)
-        
-        let firstGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.1)
-        let secondGrow = SKAction.resize(toWidth: deviceWidth - 40, height: 200 - deviceOffset, duration: 0.2)
-        
-        TVScreen.run(SKAction.sequence([firstGrow, secondGrow]))
-        croppedFrame.maskNode!.run(SKAction.sequence([firstGrow, secondGrow]))
-    }
-    
-    func hideTV(complete: (() -> Void)? = nil) {
-        
-        if isTVOn {
-            let firstShrink = SKAction.resize(toWidth: deviceWidth - 40, height: 20, duration: 0.2)
-            let secondShrink = SKAction.resize(toWidth: 20, height: 20, duration: 0.1)
-            
-            for child in self.children {
-                if child.name == "TV Frame" {
-                    child.run(SKAction.sequence([firstShrink, secondShrink, SKAction.removeFromParent()]))
-                }
-                
-                if child.name == "TV Content" {
-                    (child as! SKCropNode).maskNode!.run(SKAction.sequence([firstShrink, secondShrink, SKAction.run {
-                        child.removeAllChildren()
-                        child.removeFromParent()
-                        
-                        if complete != nil {
-                            complete!()
-                        }
-                    }]))
-                }
-            }
-            
-        }
     }
     
     func didBegin(_ contact: SKPhysicsContact) {

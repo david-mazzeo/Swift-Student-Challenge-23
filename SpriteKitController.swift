@@ -67,8 +67,6 @@ class SpaceFlightController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print("DIDLOAD")
-        
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
         let topPadding = (window?.safeAreaInsets.top ?? 0)
         
@@ -126,9 +124,7 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func switchViews(_ notification: Notification) {
-        print("FIRED")
         if !isEliminated {
-            print("LOADING")
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 hideElements()
                 
@@ -210,7 +206,6 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func startLevel(_ notification: Notification) {
-        print("eee")
         animateBackground()
         
         var duration = Double(0)
