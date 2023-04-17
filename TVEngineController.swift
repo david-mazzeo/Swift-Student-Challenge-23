@@ -56,10 +56,16 @@ extension SKScene {
         croppedFrame.name = "TV Content"
         croppedFrame.maskNode = croppedTV
         
-        if self.scene?.name == "Game" {
+        switch self.scene?.name {
+        case "Game":
             TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
             croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
-        } else {
+            
+        case "Complete":
+            TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 250) - topPadding + (deviceOffset / 2))
+            croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 250) - topPadding + (deviceOffset / 2))
+            
+        default:
             TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
             croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
         }

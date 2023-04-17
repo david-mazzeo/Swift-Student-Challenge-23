@@ -54,6 +54,9 @@
                                     <constraint firstItem="iei-S9-YXY" firstAttribute="top" secondItem="j1G-z3-1Mj" secondAttribute="top" id="lTP-6b-2oA"/>
                                 </constraints>
                             </view>
+                            <skView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X7F-be-BvK">
+                                <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
+                            </skView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VvB-vn-uqR">
                                 <rect key="frame" x="74.333333333333343" y="847.66666666666663" width="281.33333333333326" height="34.333333333333371"/>
                                 <state key="normal" title="Button"/>
@@ -117,17 +120,21 @@
                             <constraint firstAttribute="trailing" secondItem="K2C-lk-9rc" secondAttribute="trailing" id="5vM-Ux-gbf"/>
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="VvB-vn-uqR" secondAttribute="bottom" constant="16" id="7Jg-yN-Mtl"/>
                             <constraint firstItem="VvB-vn-uqR" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="7MV-xX-LcB"/>
+                            <constraint firstAttribute="bottom" secondItem="X7F-be-BvK" secondAttribute="bottom" id="9yn-4b-hy3"/>
                             <constraint firstItem="Blq-e3-JuB" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="Keg-X8-Zpg"/>
                             <constraint firstItem="Gds-L9-xZF" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="L3u-FY-mc1"/>
+                            <constraint firstItem="X7F-be-BvK" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="PFN-AW-E1H"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="UsU-XU-WWa"/>
                             <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="VLT-ok-LOq"/>
                             <constraint firstItem="Gds-L9-xZF" firstAttribute="bottomMargin" secondItem="Blq-e3-JuB" secondAttribute="top" constant="-30" id="W6y-Bi-2mx"/>
                             <constraint firstItem="j1G-z3-1Mj" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="XaD-K1-uvB"/>
+                            <constraint firstItem="X7F-be-BvK" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="b90-Bo-55b"/>
                             <constraint firstItem="K2C-lk-9rc" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="eh0-oz-Oij"/>
                             <constraint firstItem="XeG-JM-pth" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="fBO-S4-oQp"/>
                             <constraint firstItem="rZJ-Oh-1np" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="if2-uQ-R63"/>
                             <constraint firstItem="Gds-L9-xZF" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" constant="-50" id="ivQ-uc-fN8"/>
                             <constraint firstItem="XeG-JM-pth" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="qRQ-1C-3I3"/>
+                            <constraint firstItem="X7F-be-BvK" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="vgR-hX-ykD"/>
                             <constraint firstItem="K2C-lk-9rc" firstAttribute="leading" secondItem="5EZ-qb-Rvc" secondAttribute="leading" id="zNO-4Q-GdI"/>
                         </constraints>
                     </view>
@@ -140,6 +147,7 @@
                         <outlet property="continueButton" destination="Blq-e3-JuB" id="61Y-bK-50S"/>
                         <outlet property="dialogueView" destination="Gds-L9-xZF" id="qaG-Ue-kqQ"/>
                         <outlet property="goButton" destination="rZJ-Oh-1np" id="2E6-lv-JSd"/>
+                        <outlet property="spriteKitView" destination="X7F-be-BvK" id="mCv-bh-36y"/>
                         <outlet property="starView" destination="K2C-lk-9rc" id="r21-lc-pU1"/>
                         <outlet property="textHeightConstraint" destination="Z3e-wa-I9m" id="kkr-On-oxg"/>
                         <outlet property="textWidthConstraint" destination="rth-bz-fqq" id="WJm-b0-ATg"/>

@@ -18,6 +18,7 @@ class SpaceFlightController: UIViewController {
     var durationTimer = Timer()
     var currentView = "Game"
     var isEliminated = false
+    var isAlreadySwitching = false
     var isPaused = false
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     var percentElapsed = 0
@@ -60,6 +61,7 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("lifeModified"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("startLevel"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("restartLevel"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("endGame"), object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
@@ -79,10 +81,9 @@ class SpaceFlightController: UIViewController {
         
         initSK()
         
-        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-        spriteKitView.presentScene(EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-//        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        
+        print("VIEWDIDLOAD")
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -91,6 +92,7 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(lifeLost(_:)), name: Notification.Name("lifeModified"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(startLevel(_:)), name: Notification.Name("startLevel"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(restartLevel(_:)), name: Notification.Name("restartLevel"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(endGame(_:)), name: Notification.Name("endGame"), object: nil)
         
     }
     
@@ -106,6 +108,10 @@ class SpaceFlightController: UIViewController {
         })
         
         animationTimer.fire()
+    }
+    
+    @objc func endGame(_ notification: Notification) {
+        self.dismiss(animated: false)
     }
     
     @objc func restartLevel(_ notification: Notification) {
@@ -128,7 +134,9 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func switchViews(_ notification: Notification) {
-        if !isEliminated {
+        print("SWITCHVIEWS")
+        if !isEliminated && !isAlreadySwitching {
+            isAlreadySwitching = true
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 hideElements()
                 
@@ -152,6 +160,8 @@ class SpaceFlightController: UIViewController {
                 
                 UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                     displayElements()
+                }, completion: { [self] (finished: Bool) in
+                    isAlreadySwitching = false
                 })
             })
         }
@@ -224,6 +234,7 @@ class SpaceFlightController: UIViewController {
         durationTimer = Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
             if !isPaused {
                 percentElapsed += 1
+                print(percentElapsed)
                 elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
                 
                 if percentElapsed >= 100 {

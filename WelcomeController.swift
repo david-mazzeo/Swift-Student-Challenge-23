@@ -1,4 +1,5 @@
 import UIKit
+import SpriteKit
 
 enum Time {
     case Sunrise
@@ -10,7 +11,7 @@ enum Time {
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
-    var timer = Timer()
+    var areAnimationsRunning = true
     
     @IBOutlet weak var starView: UIView!
     
@@ -28,6 +29,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
     @IBOutlet weak var textHeightConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var continueButton: UIButton!
+    @IBOutlet weak var spriteKitView: SKView!
     
     var currentDialogueStage = 0
     
@@ -35,19 +37,12 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         UserDefaults.standard.set(1, forKey: "nextLevel")
         
-        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true, completion: nil)
-        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
-        
         UIView.animate(withDuration: 1, animations: { [self] in
             goButton.alpha = 0
             aboutButton.alpha = 0
         }, completion: { [self] (finished: Bool) in
             
-            presentTV {
+            presentDialogueTV {
                 
                 UIView.animate(withDuration: 0.2, animations: { [self] in
                     dialogueView.alpha = 1
@@ -67,7 +62,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
     }
     
-    func presentTV(complete: @escaping () -> Void) {
+    func presentDialogueTV(complete: @escaping () -> Void) {
         
         var widthScale = CGFloat(0)
         var heightScale = CGFloat(0)
@@ -129,10 +124,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
             vc.modalPresentationStyle = .fullScreen
             self.present(vc, animated: true, completion: nil)
             
-            view.layer.removeAllAnimations()
-            gradient.removeAllAnimations()
-            cloudView.layer.removeAllAnimations()
-            timer.invalidate()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                view.layer.removeAllAnimations()
+                gradient.removeAllAnimations()
+                cloudView.layer.removeAllAnimations()
+                self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
+                dialogueView.text = ""
+                areAnimationsRunning = false
+            }
         default: break
         }
         
@@ -147,6 +146,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
             dialogueView.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         }
         
+        spriteKitView.isHidden = true
         continueButton.isEnabled = false
         continueButton.alpha = 0
         dialogueView.alpha = 0
@@ -169,8 +169,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
             cycleTime(time: .Evening)
         }
         
-        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(endGameScene(_:)), name: Notification.Name("endGame"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(returnToTitle(_:)), name: Notification.Name("returnToTitle"), object: nil)
         
         if #available(iOS 16.0, *) {
             guard let windowScene = view.window?.windowScene else { return }
@@ -178,24 +180,22 @@ class ViewController: UIViewController, CAAnimationDelegate {
                 print(error)
             }
         }
-
-        
     }
     
     deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("endGame"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("returnToTitle"), object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
     }
     
     func initTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 100, repeats: true, block: { [self] timer in
-            cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
-            UIView.animate(withDuration: 100, delay: 0, options: [.curveLinear], animations: { [self] in
-                cloudView.transform = CGAffineTransform(translationX: -2745, y: 0)
-            })
+        self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
+        UIView.animate(withDuration: 100, delay: 0, options: [.curveLinear, .repeat], animations: { [self] in
+            cloudView.transform = CGAffineTransform(translationX: -2745, y: 0)
+        }, completion: { (finished: Bool) in
+            self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
         })
-        
-        timer.fire()
     }
     
     override func viewDidLayoutSubviews() {
@@ -252,21 +252,23 @@ class ViewController: UIViewController, CAAnimationDelegate {
             if time == .Daytime || time == .Night {
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
-                    if time == .Daytime {
-                        cycleTime(time: .Evening)
-                    } else {
-                        cycleTime(time: .Sunrise)
+                    if areAnimationsRunning {
+                        if time == .Daytime {
+                            cycleTime(time: .Evening)
+                        } else {
+                            cycleTime(time: .Sunrise)
+                        }
                     }
                 }
                 
             } else {
-                
-                switch time {
-                case .Sunrise: cycleTime(time: .Daytime)
-                case .Evening: cycleTime(time: .Night)
-                default: break
+                if areAnimationsRunning {
+                    switch time {
+                    case .Sunrise: cycleTime(time: .Daytime)
+                    case .Evening: cycleTime(time: .Night)
+                    default: break
+                    }
                 }
-                
             }
         }
 
@@ -306,9 +308,33 @@ class ViewController: UIViewController, CAAnimationDelegate {
         }
     }
     
+    @objc func endGameScene(_ notification: Notification) {
+        areAnimationsRunning = true
+        dialogueView.isHidden = true
+        tvScreen.isHidden = true
+        continueButton.isHidden = true
+        
+        gradient.removeAllAnimations()
+        gradient.colors = coloursFromTime(time: .Daytime)
+        spriteKitView.isHidden = false
+        spriteKitView.presentScene(CompleteScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+    }
+    
+    @objc func returnToTitle(_ notification: Notification) {
+        spriteKitView.presentScene(nil)
+        spriteKitView.removeFromSuperview()
+        
+        initTimer()
+        UIView.animate(withDuration: 1, animations: { [self] in
+            goButton.alpha = 1
+            aboutButton.alpha = 1
+        })
+    }
+    
     @objc func applicationWillResignActive(notification: NSNotification) {
-        timer.invalidate()
         cloudView.layer.removeAllAnimations()
+        self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
+        gradient.removeAllAnimations()
     }
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {

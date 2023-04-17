@@ -309,10 +309,9 @@ class EncounterScene: SKScene {
                 SKAction.fadeAlpha(to: 1, duration: 0.2),
                                          
                  SKAction.run {
-                     //
-                 },
-                                         
-                SKAction.fadeAlpha(to: 0, duration: 0.4)]))
+                     UserDefaults.standard.set(5, forKey: "nextLevel")
+                     NotificationCenter.default.post(Notification(name: Notification.Name("endGame")))
+                 }]))
         }]))
         
         self.addChild(redBeam)
