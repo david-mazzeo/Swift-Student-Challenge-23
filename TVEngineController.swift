@@ -19,13 +19,10 @@ extension SKScene {
         let scientistImages = [SKTexture(imageNamed: "Scientist 1"),
                                SKTexture(imageNamed: "Scientist 2")]
         
+        let phoenixImages = [SKTexture(imageNamed: "Phoenix Portrait 1"),
+                             SKTexture(imageNamed: "Phoenix Portrait 2")]
+        
         let systemImages = SKTexture(imageNamed: "System")
-        
-        for image in scientistImages {
-            image.filteringMode = .nearest
-        }
-        
-        systemImages.filteringMode = .nearest
         
         let TVScreen = SKSpriteNode(imageNamed: "CRT Shape")
         let croppedFrame = SKCropNode()
@@ -37,6 +34,7 @@ extension SKScene {
         var labelOffset = CGFloat(-10)
         var scientistSize = CGSize(width: 120, height: 162)
         var systemSize = CGSize(width: 107.5, height: 102.5)
+        var phoenixSize = CGSize(width: 175, height: 175)
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             deviceOffset = 50
@@ -46,6 +44,7 @@ extension SKScene {
             labelOffset = -5
             scientistSize = CGSize(width: 100, height: 135)
             systemSize = CGSize(width: 86, height: 82)
+            phoenixSize = CGSize(width: 150, height: 150)
         }
         
         TVScreen.name = "TV Frame"
@@ -65,18 +64,39 @@ extension SKScene {
             croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))
         }
         
-        var portrait = SKSpriteNode(imageNamed: "Scientist 1")
+        var portrait = SKSpriteNode()
         
-        if speaker == "System" {
+        switch speaker {
+        case "System":
+            
             systemImages.filteringMode = .nearest
             portrait = SKSpriteNode(texture: systemImages)
             portrait.position = CGPoint(x: (120 - deviceOffset / 2) - (deviceWidth / 2), y: 0)
             portrait.size = systemSize
-        } else {
+            
+        case "Scientist":
+            
+            for image in scientistImages {
+                image.filteringMode = .nearest
+            }
+            
             let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: scientistImages, timePerFrame: 0.3))
             portrait.run(portraitAnimation)
             portrait.position = CGPoint(x: 100 - (deviceWidth / 2), y: -10)
             portrait.size = scientistSize
+            
+        case "Phoenix":
+            
+            for image in phoenixImages {
+                image.filteringMode = .nearest
+            }
+            
+            let portraitAnimation = SKAction.repeatForever(SKAction.animate(with: phoenixImages, timePerFrame: 0.3))
+            portrait.run(portraitAnimation)
+            portrait.position = CGPoint(x: (95 - deviceOffset / 4) - (deviceWidth / 2), y: 0)
+            portrait.size = phoenixSize
+            
+        default: break
         }
         
         

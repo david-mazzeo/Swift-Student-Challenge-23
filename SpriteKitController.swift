@@ -78,7 +78,11 @@ class SpaceFlightController: UIViewController {
         self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
         
         initSK()
-        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        
+        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
+        spriteKitView.presentScene(EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        // MARK: DEBUG CODE, REMOVE BEFORE LAUNCH
+//        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)

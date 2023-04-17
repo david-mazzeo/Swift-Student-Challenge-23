@@ -61,9 +61,6 @@
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="17"/>
                                     <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
-                                <connections>
-                                    <segue destination="HGE-vU-Wet" kind="show" id="K0X-1Z-jJ2"/>
-                                </connections>
                             </button>
                             <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tall CRT Shape" translatesAutoresizingMaskIntoConstraints="NO" id="XeG-JM-pth">
                                 <rect key="frame" x="205" y="456" width="20" height="20"/>
@@ -272,22 +269,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AId-Wz-dO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2683.2558139534885" y="4.5064377682403434"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="sm3-9c-5pa">
-            <objects>
-                <viewController id="HGE-vU-Wet" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="xmT-3c-LKH">
-                        <rect key="frame" x="0.0" y="0.0" width="430" height="922"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="sle-xd-nVi"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="hNa-h4-U2R"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="VVQ-nM-yfT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1125" y="5"/>
         </scene>
     </scenes>
     <resources>
