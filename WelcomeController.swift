@@ -8,16 +8,6 @@ enum Time {
     case Night
 }
 
-class NavigationController: UINavigationController {
-    override var shouldAutorotate: Bool {
-            return false
-        }
-
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
-}
-
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
