@@ -13,25 +13,35 @@ class ViewController: UIViewController, CAAnimationDelegate {
     let gradient = CAGradientLayer()
     var areAnimationsRunning = true
     
-    var starView = UIView()
+    var wordmark = UIImageView()
     
     var goButton = UIButton()
     var aboutButton = UIButton()
     
+    var starView = UIView()
     var cloudView = UIView()
     var cloudOne = UIImageView()
     var cloudTwo = UIImageView()
     
-    var tvScreen = UIImageView()
-    var dialogueView = UITextView()
-    
     var textWidthConstraint = NSLayoutConstraint()
     var textHeightConstraint = NSLayoutConstraint()
     
+    var tvScreen = UIImageView()
     var continueButton = UIButton()
+    var dialogueView = UITextView()
+    
     var spriteKitView = SKView()
     
     var currentDialogueStage = 0
+    
+    let wordmarkImages = [UIImage(named: "Wordmark 1.png")!,
+                          UIImage(named: "Wordmark 2.png")!,
+                          UIImage(named: "Wordmark 3.png")!,
+                          UIImage(named: "Wordmark 4.png")!,
+                          UIImage(named: "Wordmark 5.png")!,
+                          UIImage(named: "Wordmark 6.png")!,
+                          UIImage(named: "Wordmark 7.png")!,
+                          UIImage(named: "Wordmark 8.png")!]
     
     @objc func go() {
         
@@ -152,6 +162,12 @@ class ViewController: UIViewController, CAAnimationDelegate {
         starView.backgroundColor = .clear
         cloudView.backgroundColor = .clear
         
+        wordmark.contentMode = .scaleAspectFit
+        wordmark.layer.magnificationFilter = .nearest
+        wordmark.animationImages = wordmarkImages
+        wordmark.animationDuration = 1
+        wordmark.startAnimating()
+        
         dialogueView.isEditable = false
         dialogueView.isSelectable = false
         dialogueView.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
@@ -200,6 +216,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         continueButton.configuration = continueConfig
         
         view.addSubview(goButton)
+        view.addSubview(wordmark)
         view.addSubview(aboutButton)
         view.addSubview(starView)
         view.addSubview(tvScreen)
@@ -213,6 +230,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         view.addSubview(spriteKitView)
         
         goButton.translatesAutoresizingMaskIntoConstraints = false
+        wordmark.translatesAutoresizingMaskIntoConstraints = false
         aboutButton.translatesAutoresizingMaskIntoConstraints = false
         spriteKitView.translatesAutoresizingMaskIntoConstraints = false
         starView.translatesAutoresizingMaskIntoConstraints = false
@@ -224,9 +242,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
         dialogueView.translatesAutoresizingMaskIntoConstraints = false
         
         goButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        goButton.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        goButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30).isActive = true
         goButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
         goButton.widthAnchor.constraint(equalToConstant: 161).isActive = true
+        
+        wordmark.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 50).isActive = true
+        wordmark.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -50).isActive = true
+        wordmark.bottomAnchor.constraint(equalTo: goButton.topAnchor, constant: 20).isActive = true
+        wordmark.heightAnchor.constraint(equalToConstant: 150).isActive = true
         
         aboutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         aboutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
@@ -287,6 +310,8 @@ class ViewController: UIViewController, CAAnimationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endGameScene(_:)), name: Notification.Name("endGame"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(returnToTitle(_:)), name: Notification.Name("returnToTitle"), object: nil)
+        
+        print(wordmark)
         
     }
     
