@@ -216,6 +216,9 @@ class SpaceFlightController: UIViewController {
     
     func initSK() {
         spriteKitView = SKView(frame: CGRect(x: 0, y: -100, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height + 200))
+        spriteKitView.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+        print(UIScreen.main.maximumFramesPerSecond)
+        print(spriteKitView.preferredFramesPerSecond)
         self.view.insertSubview(spriteKitView, at: 2)
     }
     

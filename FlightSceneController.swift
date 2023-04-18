@@ -202,67 +202,67 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         motionEngine.accelerometerUpdateInterval = 1/60
         motionEngine.gyroUpdateInterval = 1/60
         
-        motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [self] (data, error) -> Void in
-            let xAxis = motionEngine.accelerometerData?.acceleration.x ?? 0.0
-            if isSetup {
-                protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + forceModifier, dy: 0))
+        motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [weak self] (data, error) -> Void in
+            let xAxis = self?.motionEngine.accelerometerData?.acceleration.x ?? 0.0
+            if self?.isSetup == true {
+                self?.protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
             }
         })
         
-        run(SKAction.run { [self] in
+        run(SKAction.run { [weak self] in
             
-            protagonist.size = CGSize(width: 72, height: 120)
-            protagonist.position = CGPoint(x: 50, y: 163 + bottomPadding)
-            protagonist.zRotation = 0
-            protagonist.name = "Rocket"
+            self?.protagonist.size = CGSize(width: 72, height: 120)
+            self?.protagonist.position = CGPoint(x: 50, y: 163 + (self?.bottomPadding ?? 0))
+            self?.protagonist.zRotation = 0
+            self?.protagonist.name = "Rocket"
             
-            protagonist.physicsBody = SKPhysicsBody(rectangleOf: protagonist.size)
-            protagonist.physicsBody?.isDynamic = true
-            protagonist.physicsBody?.mass = 0.02
-            protagonist.physicsBody?.affectedByGravity = false
-            protagonist.physicsBody?.allowsRotation = false
-            protagonist.physicsBody?.contactTestBitMask = 1
-            protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-                                       SKConstraint.positionY(SKRange(constantValue: 163 + bottomPadding)),
-                                       SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: deviceWidth - 1))]
+            self?.protagonist.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 72, height: 120))
+            self?.protagonist.physicsBody?.isDynamic = true
+            self?.protagonist.physicsBody?.mass = 0.02
+            self?.protagonist.physicsBody?.affectedByGravity = false
+            self?.protagonist.physicsBody?.allowsRotation = false
+            self?.protagonist.physicsBody?.contactTestBitMask = 1
+            self?.protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
+                                             SKConstraint.positionY(SKRange(constantValue: 163 + (self?.bottomPadding ?? 0))),
+                                             SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: (self?.deviceWidth ?? 0) - 1))]
             
-            self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+            self?.physicsBody = SKPhysicsBody(edgeLoopFrom: self?.frame ?? CGRect())
 
-            let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: rocketImages, timePerFrame: 0.1))
-            protagonist.run(rocketAnimation)
+            let rocketAnimation = SKAction.repeatForever(SKAction.animate(with: self?.rocketImages ?? [SKTexture](), timePerFrame: 0.1))
+            self?.protagonist.run(rocketAnimation)
             
-            self.addChild(protagonist)
-            isSetup = true
+            self?.addChild(self?.protagonist ?? SKSpriteNode())
+            self?.isSetup = true
             
-            if level == 1 {
-                isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                    displayTV(dialogue: "Ah, we've arrived. Let's begin.", speaker: "Scientist")
+            if self?.level == 1 {
+                self?.isTVOn = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    self?.displayTV(dialogue: "Ah, we've arrived. Let's begin.", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
-                        hideTV()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                        self?.hideTV()
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                            displayTV(dialogue: "Steer your rocket with motion controls, and fire at asteroids by holding 'Hydrochloric Acid' at the bottom of your device.", speaker: "System")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                            self?.displayTV(dialogue: "Steer your rocket with motion controls, and fire at asteroids by holding 'Hydrochloric Acid' at the bottom of your device.", speaker: "System")
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                                hideTV()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                                self?.hideTV()
                                 NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [self] in
-                                        if !isRoundFinished {
-                                            pickObject()
+                                self?.run(SKAction.repeatForever(SKAction.sequence([
+                                    SKAction.run { [weak self] in
+                                        if self?.isRoundFinished == false {
+                                            self?.pickObject()
                                         }
                                     },
                                     SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
                                 
                                                                                                     
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                                    displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                                    self?.displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
                                     
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                                        hideTV(complete: { [self] in
-                                            isTVOn = false
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                                        self?.hideTV(complete: { [weak self] in
+                                            self?.isTVOn = false
                                         })
                                     }
                                 }
@@ -272,27 +272,27 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             
-            if level == 2 {
-                isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                    displayTV(dialogue: "Destination set to the second star. Let's do this!", speaker: "Scientist")
+            if self?.level == 2 {
+                self?.isTVOn = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    self?.displayTV(dialogue: "Destination set to the second star. Let's do this!", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
-                        hideTV()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                        self?.hideTV()
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                            displayTV(dialogue: "Comets are present in this area. Melt them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                            self?.displayTV(dialogue: "Comets are present in this area. Melt them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                                hideTV(complete: { [self] in
-                                    isTVOn = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                                self?.hideTV(complete: { [weak self] in
+                                    self?.isTVOn = false
                                 })
                                 
                                 NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [self] in
-                                        if !isRoundFinished {
-                                            pickObject()
+                                self?.run(SKAction.repeatForever(SKAction.sequence([
+                                    SKAction.run { [weak self] in
+                                        if self?.isRoundFinished == false {
+                                            self?.pickObject()
                                         }
                                     },
                                     SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
@@ -302,27 +302,27 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             
-            if level == 3 {
-                isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                    displayTV(dialogue: "This is the final stretch! You can do this!", speaker: "Scientist")
+            if self?.level == 3 {
+                self?.isTVOn = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    self?.displayTV(dialogue: "This is the final stretch! You can do this!", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
-                        hideTV()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                        self?.hideTV()
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                            displayTV(dialogue: "Black holes are present in this area. Prevent them from sucking you in by steering away from them!", speaker: "System")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                            self?.displayTV(dialogue: "Black holes are present in this area. Prevent them from sucking you in by steering away from them!", speaker: "System")
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                                hideTV(complete: { [self] in
-                                    isTVOn = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                                self?.hideTV(complete: { [weak self] in
+                                    self?.isTVOn = false
                                 })
                                 
                                 NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [self] in
-                                        if !isRoundFinished {
-                                            pickObject()
+                                self?.run(SKAction.repeatForever(SKAction.sequence([
+                                    SKAction.run { [weak self] in
+                                        if self?.isRoundFinished == false {
+                                            self?.pickObject()
                                         }
                                     },
                                     SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
@@ -437,7 +437,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 
                 forceModifier = 0
                 
-                if forceModifier == -20 {
+                if forceModifier == -10 {
                     protagonist.run(SKAction.move(to: CGPoint(x: 150, y: 163 + bottomPadding), duration: 0))
                 } else {
                     protagonist.run(SKAction.move(to: CGPoint(x: deviceWidth - protagonist.size.width - 150, y: 163 + bottomPadding), duration: 0))
@@ -456,25 +456,25 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     isTVOn = true
                     displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                        hideTV(complete: { [self] in
-                            isTVOn = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                        self?.hideTV(complete: { [weak self] in
+                            self?.isTVOn = false
                         })
                     }
                 }
                 
                 var timerCount = 0
                 
-                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [self] timer in
+                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [weak self] timer in
                     if timerCount == 10 {
                         timer.invalidate()
-                        protagonist.isHidden = false
-                        healthEvents = true
+                        self?.protagonist.isHidden = false
+                        self?.healthEvents = true
                     } else {
-                        if protagonist.isHidden {
-                            protagonist.isHidden = false
+                        if self?.protagonist.isHidden == true {
+                            self?.protagonist.isHidden = false
                         } else {
-                            protagonist.isHidden = true
+                            self?.protagonist.isHidden = true
                         }
                         
                         timerCount += 1
@@ -490,15 +490,15 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     SKAction.removeFromParent()]))
                 
                 if isTVOn {
-                    hideTV(complete: { [self] in
-                        isTVOn = false
+                    hideTV(complete: { [weak self] in
+                        self?.isTVOn = false
                     })
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                        displayTV(dialogue: pickEliminatedDialogue(), speaker: "Scientist")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                        self?.displayTV(dialogue: self?.pickEliminatedDialogue() ?? "", speaker: "Scientist")
                         
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                        hideTV()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                        self?.hideTV()
                         
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
@@ -508,8 +508,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 } else {
                     displayTV(dialogue: pickEliminatedDialogue(), speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-                        hideTV()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                        self?.hideTV()
                         
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
@@ -599,20 +599,20 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if isTVOn {
-            hideTV(complete: { [self] in
-                isTVOn = false
+            hideTV(complete: { [weak self] in
+                self?.isTVOn = false
             })
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                displayTV(dialogue: dialogue, speaker: "Scientist")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.displayTV(dialogue: dialogue, speaker: "Scientist")
             }
         } else {
             displayTV(dialogue: dialogue, speaker: "Scientist")
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [self] in
-            hideTV(complete: { [self] in
-                isTVOn = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            self?.hideTV(complete: { [weak self] in
+                self?.isTVOn = false
             })
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -734,9 +734,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         blackHole.run(SKAction.repeatForever(SKAction.animate(with: blackHoleImages, timePerFrame: 0.1)))
         
-        blackHole.run(SKAction.sequence([actionMove, SKAction.removeFromParent(), SKAction.run { [self] in
-            forceModifier = 0
-            isAlreadyBlackHole = false
+        blackHole.run(SKAction.sequence([actionMove, SKAction.removeFromParent(), SKAction.run { [weak self] in
+            self?.forceModifier = 0
+            self?.isAlreadyBlackHole = false
         }]))
     }
     
@@ -750,63 +750,63 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         let chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/24)
         
-        chargeUpView.run(SKAction.sequence([chargeUpAnimation, SKAction.removeFromParent(), SKAction.run { [self] in
-            
-            var colour = UIColor()
-            var name = "Beam"
-            protagonist.addChild(beam)
-            
-            let element = notification.userInfo?["element"] as? Int
-            
-            switch element {
-            case 1: colour = .green
-                    name = "Beam"
-            case 2: colour = .orange
-                    name = "BeamTwo"
-            default: break
-            }
-            
-            let beamHeight = (deviceHeight - 240) - (topPadding + bottomPadding)
-            let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: beamHeight)).cgPath
-            
-            beam.path = beamPath
-            beam.lineWidth = 6
-            beam.strokeColor = colour
-            
-            beam.name = name
-            beam.physicsBody = SKPhysicsBody(edgeChainFrom: beamPath)
-            beam.physicsBody?.isDynamic = true
-            beam.physicsBody?.affectedByGravity = false
-            beam.physicsBody?.allowsRotation = false
-            beam.physicsBody?.collisionBitMask = 0
-            beam.physicsBody?.contactTestBitMask = 1
-            beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-                                SKConstraint.positionY(SKRange(constantValue: 0)),
-                                SKConstraint.positionX(SKRange(constantValue: 0))]
-            
-            isBeamActive = true
-            
-            let particles = [SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode()]
-            
-            for particle in particles {
-                particle.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: 2, height: 2)).cgPath
-                particle.strokeColor = colour
-                particle.lineWidth = 1
-                
-                beam.addChild(particle)
-            }
-            
-            
-            run(SKAction.repeatForever(SKAction.sequence([
-                SKAction.run { [self] in
-                    for particle in particles {
-                        particle.position = CGPoint(x: randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12), y: random(min: 70, max: beamHeight))
-                    }
-                },
-                SKAction.wait(forDuration: 0.4)])))
-            
+        chargeUpView.run(SKAction.sequence([chargeUpAnimation, SKAction.removeFromParent(), SKAction.run { [weak self] in
+            self?.createLaser(element: (notification.userInfo?["element"] as? Int) ?? 1)
         }]))
         
+    }
+    
+    func createLaser(element: Int) {
+        var colour = UIColor()
+        var name = "Beam"
+        protagonist.addChild(beam)
+        
+        switch element {
+        case 1: colour = .green
+                name = "Beam"
+        case 2: colour = .orange
+                name = "BeamTwo"
+        default: break
+        }
+        
+        let beamHeight = (deviceHeight - 240) - (topPadding + bottomPadding)
+        let beamPath = UIBezierPath(rect: CGRect(x: 0, y: 70, width: 2, height: beamHeight)).cgPath
+        
+        beam.path = beamPath
+        beam.lineWidth = 6
+        beam.strokeColor = colour
+        
+        beam.name = name
+        beam.physicsBody = SKPhysicsBody(edgeChainFrom: beamPath)
+        beam.physicsBody?.isDynamic = true
+        beam.physicsBody?.affectedByGravity = false
+        beam.physicsBody?.allowsRotation = false
+        beam.physicsBody?.collisionBitMask = 0
+        beam.physicsBody?.contactTestBitMask = 1
+        beam.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
+                            SKConstraint.positionY(SKRange(constantValue: 0)),
+                            SKConstraint.positionX(SKRange(constantValue: 0))]
+        
+        isBeamActive = true
+        
+        let particles = [SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode(), SKShapeNode()]
+        
+        for particle in particles {
+            particle.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: 2, height: 2)).cgPath
+            particle.strokeColor = colour
+            particle.lineWidth = 1
+            
+            beam.addChild(particle)
+        }
+        
+        
+        run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.run { [weak self] in
+                for particle in particles {
+                    particle.position = CGPoint(x: self?.randomBesides(min: -20, max: 22, besidesMin: -10, besidesMax: 12) ?? 0, y: self?.random(min: 70, max: beamHeight) ?? 0)
+                }
+            },
+            SKAction.wait(forDuration: 0.4)])))
     }
     
     @objc func endLaser(_ notification: Notification) {

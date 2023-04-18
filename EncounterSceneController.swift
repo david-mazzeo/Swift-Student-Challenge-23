@@ -214,14 +214,14 @@ class EncounterScene: SKScene {
             blueSample.run(SKAction.fadeAlpha(to: 1, duration: 3))
         }, SKAction.wait(forDuration: 3), SKAction.run {
             blueBeam.run(disappearAnimation)
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "Get out of the way!", speaker: "Scientist")
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.protagonist.run(SKAction.move(by: CGVector(dx: 0, dy: -100), duration: 0.15))
-        }, SKAction.wait(forDuration: 0.5), SKAction.run { [self] in
-            hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Get out of the way!", speaker: "Scientist")
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.protagonist.run(SKAction.move(by: CGVector(dx: 0, dy: -100), duration: 0.15))
+        }, SKAction.wait(forDuration: 0.5), SKAction.run { [weak self] in
+            self?.hideTV()
             
-            let combinedPoint = CGPoint(x: deviceWidth / 2, y: deviceHeight / 2 + 100)
+            let combinedPoint = CGPoint(x: (self?.deviceWidth ?? 0) / 2, y: (self?.deviceHeight ?? 0) / 2 + 100)
             redSample.run(SKAction.move(to: combinedPoint, duration: 3))
             yellowSample.run(SKAction.move(to: combinedPoint, duration: 3))
             blueSample.run(SKAction.move(to: combinedPoint, duration: 3))
@@ -239,7 +239,7 @@ class EncounterScene: SKScene {
             flash.run(SKAction.sequence([
                 SKAction.fadeAlpha(to: 1, duration: 0.2),
                                          
-                 SKAction.run { [self] in
+                 SKAction.run { [weak self] in
                      redSample.alpha = 0
                      yellowSample.alpha = 0
                      blueSample.alpha = 0
@@ -249,61 +249,61 @@ class EncounterScene: SKScene {
                      phoenix.run(SKAction.fadeAlpha(to: 1, duration: 3))
                      
                      phoenix.run(SKAction.resize(toWidth: 305, height: 340, duration: 3))
-                     phoenix.run(SKAction.move(to: CGPoint(x: deviceWidth / 2, y: (deviceHeight / 2) + 50), duration: 3))
+                     phoenix.run(SKAction.move(to: CGPoint(x: (self?.deviceWidth ?? 0) / 2, y: ((self?.deviceHeight ?? 0) / 2) + 50), duration: 3))
                  },
                                          
                 SKAction.fadeAlpha(to: 0, duration: 0.4)]))
-        }, SKAction.wait(forDuration: 4), SKAction.run {
-            self.displayTV(dialogue: "No way...", speaker: "Scientist")
-        }, SKAction.wait(forDuration: 2), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run { [self] in
-            self.displayTV(dialogue: "Ah, so you made it.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 2), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "It... knew we were coming?", speaker: "Scientist")
-        }, SKAction.wait(forDuration: 2), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run { [self] in
-            self.displayTV(dialogue: "Of course. I've been observing your ship since you departed- erm, 'Lunaro', was it?", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 4), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run { [self] in
-            self.displayTV(dialogue: "I have to say, you're the first to make it through the debris belt. Your determination is clear.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 4), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run { [self] in
-            self.displayTV(dialogue: "On that note, I have decided to grant your wish. Your planet will be reborn, nulling the climate disaster it's currently facing.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 6), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "Before I do, however, I'd like you to make a promise on behalf of your people.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 4), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "Protect the planet you call home this time, for if it collapses again, you may not be lucky enough to convince me to save it twice.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 6), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "Can you give me this promise?", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 4), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "O- Of course!", speaker: "Scientist")
-        }, SKAction.wait(forDuration: 2), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "Very well.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 2), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run {
-            self.displayTV(dialogue: "In a moment, you'll be safely back on your now restored planet, as if nothing ever happened. Goodbye, brave crew.", speaker: "Phoenix")
-        }, SKAction.wait(forDuration: 6), SKAction.run { [self] in
-            self.hideTV()
-        }, SKAction.wait(forDuration: 1), SKAction.run { [self] in
+        }, SKAction.wait(forDuration: 4), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "No way...", speaker: "Scientist")
+        }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Ah, so you made it.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "It... knew we were coming?", speaker: "Scientist")
+        }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Of course. I've been observing your ship since you departed- erm, 'Lunaro', was it?", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 4), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "I have to say, you're the first to make it through the debris belt. Your determination is clear.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 4), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "On that note, I have decided to grant your wish. Your planet will be reborn, nulling the climate disaster it's currently facing.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 6), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Before I do, however, I'd like you to make a promise on behalf of your people.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 4), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Protect the planet you call home this time, for if it collapses again, you may not be lucky enough to convince me to save it twice.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 6), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Can you give me this promise?", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 4), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "O- Of course!", speaker: "Scientist")
+        }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+            self?.displayTV(dialogue: "Very well.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run {  [weak self] in
+            self?.displayTV(dialogue: "In a moment, you'll be safely back on your now restored planet, as if nothing ever happened. Goodbye, brave crew.", speaker: "Phoenix")
+        }, SKAction.wait(forDuration: 6), SKAction.run { [weak self] in
+            self?.hideTV()
+        }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
             phoenix.run(SKAction.resize(toWidth: 427, height: 476, duration: 1))
-            phoenix.run(SKAction.move(to: CGPoint(x: deviceWidth / 2, y: (deviceHeight / 2) + 100), duration: 1))
+            phoenix.run(SKAction.move(to: CGPoint(x: (self?.deviceWidth ?? 0) / 2, y: ((self?.deviceHeight ?? 0) / 2) + 100), duration: 1))
         }, SKAction.wait(forDuration: 1), SKAction.run {
             flash.run(SKAction.sequence([
                 SKAction.fadeAlpha(to: 1, duration: 0.2),

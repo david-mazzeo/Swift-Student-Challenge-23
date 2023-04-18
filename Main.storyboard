@@ -156,7 +156,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1897.6744186046512" y="4.5064377682403434"/>
+            <point key="canvasLocation" x="2796.2790697674418" y="4.5064377682403434"/>
         </scene>
         <!--Space Flight Controller-->
         <scene sceneID="pQp-N7-TsT">
@@ -276,7 +276,24 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AId-Wz-dO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2683.2558139534885" y="4.5064377682403434"/>
+            <point key="canvasLocation" x="3581.8604651162791" y="4.5064377682403434"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="WgX-Sm-xDk">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" navigationBarHidden="YES" id="5rx-ga-cdR" customClass="NavigationController" customModule="AppModule" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Kcu-2H-eAP">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Y6W-OH-hqX" kind="relationship" relationship="rootViewController" id="U1v-2b-bGX"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="I2d-lU-eHZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1897.6744186046512" y="4.5064377682403434"/>
         </scene>
     </scenes>
     <resources>

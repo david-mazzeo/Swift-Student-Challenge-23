@@ -126,22 +126,22 @@ class StarSampleScene: SKScene {
         beam.run(SKAction.sequence([
                  SKAction.wait(forDuration: 2.5),
                  SKAction.fadeAlpha(to: 0, duration: 0.5),
-                 SKAction.run { [self] in
-                     displayTV(dialogue: "Successfully acquired the \(starName) Sample.", speaker: "System")
+                 SKAction.run { [weak self] in
+                     self?.displayTV(dialogue: "Successfully acquired the \(starName) Sample.", speaker: "System")
                      
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
-                         hideTV()
+                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                         self?.hideTV()
                          
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
-                         switch level {
-                         case 1: displayTV(dialogue: "First star down! Two more to go!", speaker: "Scientist")
-                         case 2: displayTV(dialogue: "You've collected the second sample, nice work! One left!", speaker: "Scientist")
-                         case 3: displayTV(dialogue: "You got the last sample! Now, prepare to fuse them.", speaker: "Scientist")
+                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                         switch self?.level {
+                         case 1: self?.displayTV(dialogue: "First star down! Two more to go!", speaker: "Scientist")
+                         case 2: self?.displayTV(dialogue: "You've collected the second sample, nice work! One left!", speaker: "Scientist")
+                         case 3: self?.displayTV(dialogue: "You got the last sample! Now, prepare to fuse them.", speaker: "Scientist")
                          default: break
                          }
                          
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
-                         hideTV()
+                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                         self?.hideTV()
                          
                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                          NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)

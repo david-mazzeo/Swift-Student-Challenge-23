@@ -8,6 +8,16 @@ enum Time {
     case Night
 }
 
+class NavigationController: UINavigationController {
+    override var shouldAutorotate: Bool {
+            return false
+        }
+
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+}
+
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
@@ -174,12 +184,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(endGameScene(_:)), name: Notification.Name("endGame"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(returnToTitle(_:)), name: Notification.Name("returnToTitle"), object: nil)
         
-        if #available(iOS 16.0, *) {
-            guard let windowScene = view.window?.windowScene else { return }
-            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
-                print(error)
-            }
-        }
     }
     
     deinit {

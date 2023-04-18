@@ -17,6 +17,10 @@ struct AppController: UIViewControllerRepresentable {
         return vc
     }
     
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return .portrait
+    }
+    
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
 }
