@@ -23,34 +23,34 @@ class SpaceFlightController: UIViewController {
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     var percentElapsed = 0
     
-    @IBOutlet weak var backgroundView: UIView!
+    var backgroundView = UIView()
     var spriteKitView = SKView()
     
-    @IBOutlet weak var elementOneButton: UIButton!
-    @IBOutlet weak var elementTwoButton: UIButton!
+    var elementOneButton = UIButton()
+    var elementTwoButton = UIButton()
     
-    @IBOutlet weak var bottomBackgroundConstraint: NSLayoutConstraint!
+    var bottomBackgroundConstraint = NSLayoutConstraint()
     
-    @IBOutlet weak var livesButton: UIButton!
-    @IBOutlet weak var destroyedButton: UIButton!
-    @IBOutlet weak var elapsedButton: UIButton!
+    var livesButton = UIButton()
+    var destroyedButton = UIButton()
+    var elapsedButton = UIButton()
     
-    @IBAction func elementOneFire(_ sender: Any) {
+    @objc func elementOneFire() {
         elementTwoButton.isEnabled = false
         NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 1])
     }
     
-    @IBAction func elementOneReleased(_ sender: Any) {
+    @objc func elementOneReleased() {
         elementTwoButton.isEnabled = true
         NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
     
-    @IBAction func elementTwoFire(_ sender: Any) {
+    @objc func elementTwoFire() {
         elementOneButton.isEnabled = false
         NotificationCenter.default.post(name: Notification.Name("fire"), object: nil, userInfo: ["element": 2])
     }
     
-    @IBAction func elementTwoReleased(_ sender: Any) {
+    @objc func elementTwoReleased() {
         elementOneButton.isEnabled = true
         NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
@@ -69,6 +69,8 @@ class SpaceFlightController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = .black
+        
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
         let topPadding = (window?.safeAreaInsets.top ?? 0)
         
@@ -79,11 +81,115 @@ class SpaceFlightController: UIViewController {
         
         self.backgroundView.backgroundColor = UIColor(patternImage: UIImage(named: "Space Pattern")!)
         
+        let buttonTitleAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
+        
+        var livesConfig = UIButton.Configuration.tinted()
+        livesConfig.attributedTitle = AttributedString("3", attributes: buttonTitleAttributes)
+        livesConfig.subtitle = "lives left"
+        livesConfig.baseForegroundColor = .systemRed
+        livesConfig.baseBackgroundColor = .systemRed
+        livesConfig.cornerStyle = .capsule
+        livesConfig.titleAlignment = .center
+        livesConfig.titlePadding = -2
+        
+        var destroyedConfig = UIButton.Configuration.gray()
+        destroyedConfig.attributedTitle = AttributedString("0", attributes: buttonTitleAttributes)
+        destroyedConfig.subtitle = "destroyed"
+        destroyedConfig.baseForegroundColor = .white
+        destroyedConfig.cornerStyle = .capsule
+        destroyedConfig.titleAlignment = .center
+        destroyedConfig.titlePadding = -2
+        
+        var elapsedConfig = UIButton.Configuration.tinted()
+        elapsedConfig.attributedTitle = AttributedString("0%", attributes: buttonTitleAttributes)
+        elapsedConfig.subtitle = "complete"
+        elapsedConfig.baseForegroundColor = .systemBlue
+        elapsedConfig.baseBackgroundColor = .systemBlue
+        elapsedConfig.cornerStyle = .capsule
+        elapsedConfig.titleAlignment = .center
+        elapsedConfig.titlePadding = -2
+        
+        var elementOneConfig = UIButton.Configuration.tinted()
+        elementOneConfig.attributedTitle = AttributedString("Hydrochloric Acid", attributes: buttonTitleAttributes)
+        elementOneConfig.baseForegroundColor = .systemGreen
+        elementOneConfig.baseBackgroundColor = .systemGreen
+        elementOneConfig.cornerStyle = .capsule
+        elementOneConfig.titlePadding = -2
+        
+        var elementTwoConfig = UIButton.Configuration.tinted()
+        elementTwoConfig.attributedTitle = AttributedString("Thermal Energy", attributes: buttonTitleAttributes)
+        elementTwoConfig.baseForegroundColor = .systemOrange
+        elementTwoConfig.baseBackgroundColor = .systemOrange
+        elementTwoConfig.cornerStyle = .capsule
+        elementTwoConfig.titlePadding = -2
+        
+        elementOneButton.addTarget(self, action: #selector(elementOneFire), for: .touchDown)
+        elementOneButton.addTarget(self, action: #selector(elementOneReleased), for: .touchUpInside)
+        elementOneButton.addTarget(self, action: #selector(elementOneReleased), for: .touchDragExit)
+        
+        elementTwoButton.addTarget(self, action: #selector(elementTwoFire), for: .touchDown)
+        elementTwoButton.addTarget(self, action: #selector(elementTwoReleased), for: .touchUpInside)
+        elementTwoButton.addTarget(self, action: #selector(elementTwoReleased), for: .touchDragExit)
+        
+        livesButton.configuration = livesConfig
+        destroyedButton.configuration = destroyedConfig
+        elapsedButton.configuration = elapsedConfig
+        elementOneButton.configuration = elementOneConfig
+        elementTwoButton.configuration = elementTwoConfig
+        
+        view.addSubview(backgroundView)
+        view.addSubview(livesButton)
+        view.addSubview(destroyedButton)
+        view.addSubview(elapsedButton)
+        view.addSubview(elementOneButton)
+        view.addSubview(elementTwoButton)
+        
+        livesButton.translatesAutoresizingMaskIntoConstraints = false
+        destroyedButton.translatesAutoresizingMaskIntoConstraints = false
+        elapsedButton.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        elementOneButton.translatesAutoresizingMaskIntoConstraints = false
+        elementTwoButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        livesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        livesButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+        livesButton.heightAnchor.constraint(equalToConstant: 46).isActive = true
+        livesButton.rightAnchor.constraint(equalTo: destroyedButton.leftAnchor, constant: -15).isActive = true
+        livesButton.widthAnchor.constraint(equalTo: destroyedButton.widthAnchor, multiplier: 1).isActive = true
+        livesButton.widthAnchor.constraint(equalTo: elapsedButton.widthAnchor, multiplier: 1).isActive = true
+        
+        destroyedButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        destroyedButton.heightAnchor.constraint(equalToConstant: 46).isActive = true
+        destroyedButton.rightAnchor.constraint(equalTo: elapsedButton.leftAnchor, constant: -15).isActive = true
+        destroyedButton.widthAnchor.constraint(equalTo: livesButton.widthAnchor, multiplier: 1).isActive = true
+        destroyedButton.widthAnchor.constraint(equalTo: elapsedButton.widthAnchor, multiplier: 1).isActive = true
+        
+        elapsedButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        elapsedButton.heightAnchor.constraint(equalToConstant: 46).isActive = true
+        elapsedButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+        elapsedButton.widthAnchor.constraint(equalTo: livesButton.widthAnchor, multiplier: 1).isActive = true
+        elapsedButton.widthAnchor.constraint(equalTo: destroyedButton.widthAnchor, multiplier: 1).isActive = true
+        
+        backgroundView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        backgroundView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        backgroundView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        
+        bottomBackgroundConstraint = backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 100)
+        bottomBackgroundConstraint.isActive = true
+        
+        elementOneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        elementOneButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+        elementOneButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
+        elementOneButton.rightAnchor.constraint(equalTo: elementTwoButton.leftAnchor, constant: -10).isActive = true
+        elementOneButton.widthAnchor.constraint(equalTo: elementTwoButton.widthAnchor, multiplier: 1).isActive = true
+        
+        elementTwoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        elementTwoButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+        elementTwoButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
+        elementTwoButton.widthAnchor.constraint(equalTo: elementOneButton.widthAnchor, multiplier: 1).isActive = true
+        
         initSK()
-        
         spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
-        
-        print("VIEWDIDLOAD")
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -97,12 +203,11 @@ class SpaceFlightController: UIViewController {
     }
     
     func animateBackground() {
-        let patternHeight = -(444 * UIScreen.main.scale)
-        bottomBackgroundConstraint.constant = patternHeight
+        bottomBackgroundConstraint.constant = 444
         
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [self] timer in
-            backgroundView.transform = CGAffineTransform(translationX: 0, y: patternHeight)
-            UIView.animate(withDuration: 30, delay: 0, options: [.curveLinear], animations: { [self] in
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true, block: { [self] timer in
+            backgroundView.transform = CGAffineTransform(translationX: 0, y: -444)
+            UIView.animate(withDuration: 10, delay: 0, options: [.curveLinear], animations: { [self] in
                 backgroundView.transform = CGAffineTransform(translationX: 0, y: 0)
             })
         })
@@ -134,7 +239,6 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func switchViews(_ notification: Notification) {
-        print("SWITCHVIEWS")
         if !isEliminated && !isAlreadySwitching {
             isAlreadySwitching = true
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
@@ -217,8 +321,6 @@ class SpaceFlightController: UIViewController {
     func initSK() {
         spriteKitView = SKView(frame: CGRect(x: 0, y: -100, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height + 200))
         spriteKitView.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
-        print(UIScreen.main.maximumFramesPerSecond)
-        print(spriteKitView.preferredFramesPerSecond)
         self.view.insertSubview(spriteKitView, at: 2)
     }
     
@@ -237,7 +339,6 @@ class SpaceFlightController: UIViewController {
         durationTimer = Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
             if !isPaused {
                 percentElapsed += 1
-                print(percentElapsed)
                 elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
                 
                 if percentElapsed >= 100 {

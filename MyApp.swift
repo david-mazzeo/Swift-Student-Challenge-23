@@ -12,9 +12,7 @@ struct MyApp: App {
 struct AppController: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> UIViewController {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "Welcome")
-        return vc
+        return ViewController()
     }
     
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {

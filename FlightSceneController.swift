@@ -134,12 +134,9 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("released"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("finishLevel"), object: nil)
-        print("DEINITIALISED")
     }
     
     override func didMove(to view: SKView) {
-        
-        print("NEWVIEW")
         
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
@@ -554,7 +551,6 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc func finishLevel(_ notification: Notification) {
-        print("LEVEL FINISHED")
         isRoundFinished = true
         motionEngine.stopAccelerometerUpdates()
         motionEngine.stopGyroUpdates()

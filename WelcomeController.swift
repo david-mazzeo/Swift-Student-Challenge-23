@@ -13,27 +13,27 @@ class ViewController: UIViewController, CAAnimationDelegate {
     let gradient = CAGradientLayer()
     var areAnimationsRunning = true
     
-    @IBOutlet weak var starView: UIView!
+    var starView = UIView()
     
-    @IBOutlet weak var goButton: UIButton!
-    @IBOutlet weak var aboutButton: UIButton!
+    var goButton = UIButton()
+    var aboutButton = UIButton()
     
-    @IBOutlet weak var cloudView: UIView!
-    @IBOutlet weak var cloudOne: UIImageView!
-    @IBOutlet weak var cloudTwo: UIImageView!
+    var cloudView = UIView()
+    var cloudOne = UIImageView()
+    var cloudTwo = UIImageView()
     
-    @IBOutlet weak var tvScreen: UIImageView!
-    @IBOutlet weak var dialogueView: UITextView!
+    var tvScreen = UIImageView()
+    var dialogueView = UITextView()
     
-    @IBOutlet weak var textWidthConstraint: NSLayoutConstraint!
-    @IBOutlet weak var textHeightConstraint: NSLayoutConstraint!
+    var textWidthConstraint = NSLayoutConstraint()
+    var textHeightConstraint = NSLayoutConstraint()
     
-    @IBOutlet weak var continueButton: UIButton!
-    @IBOutlet weak var spriteKitView: SKView!
+    var continueButton = UIButton()
+    var spriteKitView = SKView()
     
     var currentDialogueStage = 0
     
-    @IBAction func go(_ sender: Any) {
+    @objc func go() {
         
         UserDefaults.standard.set(1, forKey: "nextLevel")
         
@@ -100,7 +100,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         }) })
     }
     
-    @IBAction func continueDialogue(_ sender: Any) {
+    @objc func continueDialogue() {
         switch currentDialogueStage {
         case 0:
             continueButton.isEnabled = false
@@ -119,8 +119,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
                         continueButton.isEnabled = true
                     })
         case 2:
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "FlightScene")
+            let vc = SpaceFlightController()
             vc.modalPresentationStyle = .fullScreen
             self.present(vc, animated: true, completion: nil)
             
@@ -141,7 +140,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // MARK: View Initialisation
         if UIDevice.current.userInterfaceIdiom == .phone {
             dialogueView.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         }
@@ -151,7 +149,24 @@ class ViewController: UIViewController, CAAnimationDelegate {
         continueButton.alpha = 0
         dialogueView.alpha = 0
         
-        // Sets up and displays the inital background gradient.
+        starView.backgroundColor = .clear
+        cloudView.backgroundColor = .clear
+        
+        dialogueView.isEditable = false
+        dialogueView.isSelectable = false
+        dialogueView.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
+        dialogueView.textColor = .green
+        dialogueView.backgroundColor = .clear
+        
+        cloudOne.image = UIImage(named: "Day Clouds")
+        cloudTwo.image = UIImage(named: "Day Clouds")
+        
+        tvScreen.isHidden = true
+        tvScreen.image = UIImage(named: "Tall CRT Shape")
+        
+        goButton.addTarget(self, action: #selector(go), for: .touchUpInside)
+        continueButton.addTarget(self, action: #selector(continueDialogue), for: .touchUpInside)
+        
         let window = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
         let topPadding = (window?.safeAreaInsets.top ?? 0)
 
@@ -160,11 +175,110 @@ class ViewController: UIViewController, CAAnimationDelegate {
 
         view.layer.insertSublayer(gradient, at: 0)
         
-        // Sets image views to upscale with nearest neighbour, optimising them for pixel art.
         cloudOne.layer.magnificationFilter = .nearest
         cloudTwo.layer.magnificationFilter = .nearest
         
-        // MARK: Begins passing time.
+        var goConfig = UIButton.Configuration.filled()
+        goConfig.attributedTitle = AttributedString("Take Off", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 30, weight: .bold)]))
+        goConfig.baseForegroundColor = .black
+        goConfig.baseBackgroundColor = .white
+        goConfig.cornerStyle = .capsule
+        
+        var aboutConfig = UIButton.Configuration.gray()
+        aboutConfig.attributedTitle = AttributedString("Made with ❤️ by David Mazzeo.", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 17, weight: .bold)]))
+        aboutConfig.baseForegroundColor = .white
+        aboutConfig.cornerStyle = .capsule
+        
+        var continueConfig = UIButton.Configuration.gray()
+        continueConfig.attributedTitle = AttributedString("Continue", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 30, weight: .bold)]))
+        continueConfig.baseForegroundColor = .white
+        continueConfig.baseBackgroundColor = .systemGreen
+        continueConfig.cornerStyle = .capsule
+        
+        goButton.configuration = goConfig
+        aboutButton.configuration = aboutConfig
+        continueButton.configuration = continueConfig
+        
+        view.addSubview(goButton)
+        view.addSubview(aboutButton)
+        view.addSubview(starView)
+        view.addSubview(tvScreen)
+        view.addSubview(continueButton)
+        view.addSubview(dialogueView)
+        
+        cloudView.addSubview(cloudOne)
+        cloudView.addSubview(cloudTwo)
+        
+        view.addSubview(cloudView)
+        view.addSubview(spriteKitView)
+        
+        goButton.translatesAutoresizingMaskIntoConstraints = false
+        aboutButton.translatesAutoresizingMaskIntoConstraints = false
+        spriteKitView.translatesAutoresizingMaskIntoConstraints = false
+        starView.translatesAutoresizingMaskIntoConstraints = false
+        cloudView.translatesAutoresizingMaskIntoConstraints = false
+        cloudOne.translatesAutoresizingMaskIntoConstraints = false
+        cloudTwo.translatesAutoresizingMaskIntoConstraints = false
+        tvScreen.translatesAutoresizingMaskIntoConstraints = false
+        continueButton.translatesAutoresizingMaskIntoConstraints = false
+        dialogueView.translatesAutoresizingMaskIntoConstraints = false
+        
+        goButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        goButton.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        goButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        goButton.widthAnchor.constraint(equalToConstant: 161).isActive = true
+        
+        aboutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        aboutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        
+        spriteKitView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        spriteKitView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        spriteKitView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        spriteKitView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        starView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        starView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        starView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        starView.heightAnchor.constraint(equalToConstant: 250).isActive = true
+        
+        cloudView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        cloudView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        cloudView.widthAnchor.constraint(equalToConstant: 5490).isActive = true
+        cloudView.heightAnchor.constraint(equalToConstant: 110).isActive = true
+        
+        cloudOne.topAnchor.constraint(equalTo: cloudView.topAnchor).isActive = true
+        cloudOne.bottomAnchor.constraint(equalTo: cloudView.bottomAnchor).isActive = true
+        cloudOne.leftAnchor.constraint(equalTo: cloudView.leftAnchor).isActive = true
+        cloudOne.widthAnchor.constraint(equalToConstant: 2745).isActive = true
+        cloudOne.heightAnchor.constraint(equalToConstant: 110).isActive = true
+        
+        cloudTwo.topAnchor.constraint(equalTo: cloudView.topAnchor).isActive = true
+        cloudTwo.bottomAnchor.constraint(equalTo: cloudView.bottomAnchor).isActive = true
+        cloudTwo.leftAnchor.constraint(equalTo: cloudOne.rightAnchor).isActive = true
+        cloudTwo.rightAnchor.constraint(equalTo: cloudView.rightAnchor).isActive = true
+        cloudTwo.widthAnchor.constraint(equalToConstant: 2745).isActive = true
+        cloudTwo.heightAnchor.constraint(equalToConstant: 110).isActive = true
+        
+        tvScreen.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        tvScreen.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        tvScreen.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        tvScreen.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        
+        continueButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        continueButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        continueButton.widthAnchor.constraint(equalToConstant: 198).isActive = true
+        continueButton.topAnchor.constraint(equalTo: dialogueView.bottomAnchor, constant: -30).isActive = true
+        
+        dialogueView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        dialogueView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50).isActive = true
+        textHeightConstraint = dialogueView.heightAnchor.constraint(equalToConstant: 20)
+        textWidthConstraint = dialogueView.widthAnchor.constraint(equalToConstant: 20)
+        
+        textWidthConstraint.isActive = true
+        textHeightConstraint.isActive = true
+        
+        starView.alpha = 0
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [self] in
             cycleTime(time: .Evening)
         }
@@ -202,7 +316,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         starGradient.endPoint = CGPointMake(0, 1)
         
         starView.layer.mask = starGradient
-        starView.alpha = 0
     }
     
     func cycleTime(time: Time, express: Bool = false) {
