@@ -215,7 +215,7 @@ class EncounterScene: SKScene {
         }, SKAction.wait(forDuration: 3), SKAction.run {
             blueBeam.run(disappearAnimation)
         }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
-            self?.displayTV(dialogue: "Get out of the way!", speaker: "Scientist")
+            self?.displayTV(dialogue: "Move, quickly!", speaker: "Scientist")
         }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
             self?.protagonist.run(SKAction.move(by: CGVector(dx: 0, dy: -100), duration: 0.15))
         }, SKAction.wait(forDuration: 0.5), SKAction.run { [weak self] in

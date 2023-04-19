@@ -11,7 +11,12 @@ enum Time {
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
+    
+    var orientation = UIInterfaceOrientation.portrait
+    
     var areAnimationsRunning = true
+    var waitingToPresent = false
+    var isListeningForOrientation = false
     
     var wordmark = UIImageView()
     
@@ -31,6 +36,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
     var dialogueView = UITextView()
     
     var spriteKitView = SKView()
+    var rotateLabel = UILabel()
     
     var currentDialogueStage = 0
     
@@ -100,6 +106,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
             textHeightConstraint.constant = (heightScale * 20) - 200
         }
         
+        if tvScreen.frame.size != CGSize(width: 20, height: 20) {
+            tvScreen.transform = CGAffineTransform(scaleX: 1, y: 1)
+        }
+        
         tvScreen.isHidden = false
         
         UIView.animate(withDuration: 0.1, animations: { [self] in
@@ -150,6 +160,8 @@ class ViewController: UIViewController, CAAnimationDelegate {
                 dialogueView.text = ""
                 areAnimationsRunning = false
             }
+            
+            currentDialogueStage = -1
         default: break
         }
         
@@ -224,6 +236,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
         aboutButton.configuration = aboutConfig
         continueButton.configuration = continueConfig
         
+        continueButton.isEnabled = false
+        
+        rotateLabel.text = "Please rotate your device to portrait mode."
+        rotateLabel.font = UIFont.systemFont(ofSize: 30, weight: .semibold)
+        rotateLabel.textColor = .white
+        rotateLabel.textAlignment = .center
+        
         view.addSubview(goButton)
         view.addSubview(wordmark)
         view.addSubview(aboutButton)
@@ -237,6 +256,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         view.addSubview(continueButton)
         view.addSubview(dialogueView)
         view.addSubview(spriteKitView)
+        view.addSubview(rotateLabel)
         
         goButton.translatesAutoresizingMaskIntoConstraints = false
         wordmark.translatesAutoresizingMaskIntoConstraints = false
@@ -249,6 +269,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         tvScreen.translatesAutoresizingMaskIntoConstraints = false
         continueButton.translatesAutoresizingMaskIntoConstraints = false
         dialogueView.translatesAutoresizingMaskIntoConstraints = false
+        rotateLabel.translatesAutoresizingMaskIntoConstraints = false
         
         goButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         goButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30).isActive = true
@@ -305,6 +326,11 @@ class ViewController: UIViewController, CAAnimationDelegate {
         dialogueView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50).isActive = true
         textHeightConstraint = dialogueView.heightAnchor.constraint(equalToConstant: 20)
         textWidthConstraint = dialogueView.widthAnchor.constraint(equalToConstant: 20)
+        
+        rotateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        rotateLabel.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        rotateLabel.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        rotateLabel.isHidden = true
         
         textWidthConstraint.isActive = true
         textHeightConstraint.isActive = true
@@ -451,19 +477,34 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     @objc func endGameScene(_ notification: Notification) {
         areAnimationsRunning = true
-        dialogueView.isHidden = true
         tvScreen.isHidden = true
-        continueButton.isHidden = true
+        continueButton.alpha = 0
+        dialogueView.alpha = 0
+        
+        continueButton.isEnabled = false
+        
+        textWidthConstraint.constant = 20
+        textHeightConstraint.constant = 20
         
         starView.alpha = 0
         gradient.removeAllAnimations()
         gradient.colors = coloursFromTime(time: .Daytime)
+        
         spriteKitView.isHidden = false
-        spriteKitView.presentScene(CompleteScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        
+        isListeningForOrientation = true
+        orientation = UIInterfaceOrientation(rawValue: (UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation.rawValue ?? 0))!
+        rotationCheck(isViewInitialising: true)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+            initTimer()
+        }
     }
     
     @objc func returnToTitle(_ notification: Notification) {
+        isListeningForOrientation = false
         spriteKitView.presentScene(nil)
+        spriteKitView.isHidden = true
         spriteKitView.removeFromSuperview()
         cycleTime(time: .Evening)
         
@@ -486,15 +527,45 @@ class ViewController: UIViewController, CAAnimationDelegate {
         initTimer()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        if cloudView.layer.animationKeys()?.isEmpty == true || cloudView.layer.animationKeys() == nil {
-            initTimer()
-        }
-    }
-    
     override func viewDidDisappear(_ animated: Bool) {
         cloudView.layer.removeAllAnimations()
         self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        if isListeningForOrientation {
+            orientation = UIInterfaceOrientation(rawValue: (UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation.rawValue ?? 0))!
+            rotationCheck()
+        }
+    }
+    
+    func rotationCheck(isViewInitialising: Bool = false) {
+        if orientation.isLandscape {
+            print("landscape")
+            spriteKitView.isPaused = true
+            spriteKitView.isHidden = true
+            
+            rotateLabel.isHidden = false
+            
+            if isViewInitialising {
+                waitingToPresent = true
+            }
+            
+        } else {
+            print("portrait")
+            spriteKitView.isPaused = false
+            spriteKitView.isHidden = false
+            
+            rotateLabel.isHidden = true
+            
+            if isViewInitialising {
+                spriteKitView.presentScene(CompleteScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+            }
+            
+            if waitingToPresent {
+                spriteKitView.presentScene(CompleteScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+            }
+        }
     }
     
 }

@@ -14,15 +14,22 @@ var wasLandscape = false
 
 class SpaceFlightController: UIViewController {
     
-    var orientation = UIInterfaceOrientation.portrait
     let gradient = CAGradientLayer()
+    
     var animationTimer = Timer()
     var durationTimer = Timer()
+    
     var currentView = "Game"
+    var percentElapsed = 0
+    
     var isEliminated = false
     var isAlreadySwitching = false
+    
+    var orientation = UIInterfaceOrientation.portrait
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
-    var percentElapsed = 0
+    
+    var waitingToPresent = false
+    var waitingScene = 0
     
     var backgroundView = UIView()
     var spriteKitView = SKView()
@@ -142,7 +149,7 @@ class SpaceFlightController: UIViewController {
         elementOneButton.configuration = elementOneConfig
         elementTwoButton.configuration = elementTwoConfig
         
-        rotateLabel.text = "Please rotate your device."
+        rotateLabel.text = "Please rotate your device to portrait mode."
         rotateLabel.font = UIFont.systemFont(ofSize: 30, weight: .semibold)
         rotateLabel.textColor = .white
         rotateLabel.textAlignment = .center
@@ -430,9 +437,6 @@ class SpaceFlightController: UIViewController {
             rotationCheck()
         }
     }
-    
-    var waitingToPresent = false
-    var waitingScene = 0
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         orientation = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation ?? .portrait
