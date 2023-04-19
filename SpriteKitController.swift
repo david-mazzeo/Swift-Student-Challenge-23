@@ -24,6 +24,7 @@ class SpaceFlightController: UIViewController {
     
     var isEliminated = false
     var isAlreadySwitching = false
+    var isBackgroundAnimating = false
     
     var orientation = UIInterfaceOrientation.portrait
     var backgroundAlpha = CGFloat(1)
@@ -447,6 +448,7 @@ class SpaceFlightController: UIViewController {
     
     @objc func startLevel(_ notification: Notification) {
         animateBackground()
+        isBackgroundAnimating = true
         
         var duration = Double(0)
         
@@ -465,6 +467,7 @@ class SpaceFlightController: UIViewController {
                 if percentElapsed >= 100 {
                     NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
                     animationTimer.invalidate()
+                    isBackgroundAnimating = false
                     timer.invalidate()
                 }
             }
@@ -501,12 +504,17 @@ class SpaceFlightController: UIViewController {
     
     @objc func applicationWillResignActive(notification: NSNotification) {
         spriteKitView.isPaused = true
+        animationTimer.invalidate()
         NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
         elementOneButton.isEnabled = true
         elementTwoButton.isEnabled = true
     }
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
+        if isBackgroundAnimating {
+            animateBackground()
+        }
+        
         spriteKitView.isPaused = false
     }
     
@@ -549,6 +557,8 @@ class SpaceFlightController: UIViewController {
             elapsedButton.isHidden = true
             elementOneButton.isHidden = true
             elementTwoButton.isHidden = true
+            leftButton.isHidden = true
+            rightButton.isHidden = true
             
             if isViewInitialising {
                 waitingToPresent = true
@@ -567,6 +577,11 @@ class SpaceFlightController: UIViewController {
             elapsedButton.isHidden = false
             elementOneButton.isHidden = false
             elementTwoButton.isHidden = false
+            
+            if UserDefaults.standard.string(forKey: "controls") == "buttons" {
+                leftButton.isHidden = false
+                rightButton.isHidden = false
+            }
             
             var sceneToPresent = SKScene()
             

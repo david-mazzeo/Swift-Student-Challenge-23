@@ -42,6 +42,13 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                                SKTexture(imageNamed: "Green Charge 5"),
                                SKTexture(imageNamed: "Green Charge 6")]
     
+    let orangeChargeUpImages = [SKTexture(imageNamed: "Orange Charge 1"),
+                                SKTexture(imageNamed: "Orange Charge 2"),
+                                SKTexture(imageNamed: "Orange Charge 3"),
+                                SKTexture(imageNamed: "Orange Charge 4"),
+                                SKTexture(imageNamed: "Orange Charge 5"),
+                                SKTexture(imageNamed: "Orange Charge 6")]
+    
     let asteroidDestroyedImages = [SKTexture(imageNamed: "Asteroid Hit 1"),
                                    SKTexture(imageNamed: "Asteroid Hit 2"),
                                    SKTexture(imageNamed: "Asteroid Hit 3"),
@@ -158,6 +165,10 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }
         
         for image in greenChargeUpImages {
+            image.filteringMode = .nearest
+        }
+        
+        for image in orangeChargeUpImages {
             image.filteringMode = .nearest
         }
         
@@ -774,6 +785,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     }
     
     @objc func fireLaser(_ notification: Notification) {
+        let element = (notification.userInfo?["element"] as? Int) ?? 1
         let chargeUpView = SKSpriteNode(texture: greenChargeUpImages.first)
         
         chargeUpView.size = CGSize(width: 24, height: 18)
@@ -781,10 +793,16 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         
         protagonist.addChild(chargeUpView)
         
-        let chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/24)
+        var chargeUpAnimation = SKAction()
+        
+        if element == 1 {
+            chargeUpAnimation = SKAction.animate(with: greenChargeUpImages, timePerFrame: 1/24)
+        } else {
+            chargeUpAnimation = SKAction.animate(with: orangeChargeUpImages, timePerFrame: 1/24)
+        }
         
         chargeUpView.run(SKAction.sequence([chargeUpAnimation, SKAction.removeFromParent(), SKAction.run { [weak self] in
-            self?.createLaser(element: (notification.userInfo?["element"] as? Int) ?? 1)
+            self?.createLaser(element: element)
         }]))
         
     }

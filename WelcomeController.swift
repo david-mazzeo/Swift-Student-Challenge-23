@@ -188,6 +188,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
                 
             }, completion: { [self]_ in
                 
+                continueButton.isEnabled = true
+                backgroundSwitch.isEnabled = true
+                motionSwitch.isEnabled = true
+                
                 UIView.animate(withDuration: 1, animations: { [self] in
                     
                     settingsLabel.alpha = 1
@@ -196,12 +200,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
                     motionSwitch.alpha = 1
                     backgroundLabel.alpha = 1
                     backgroundSwitch.alpha = 1
-                    
-                }, completion: { [self]_ in
-                    
-                    continueButton.isEnabled = true
-                    backgroundSwitch.isEnabled = true
-                    motionSwitch.isEnabled = true
                     
                 })
             })
@@ -321,7 +319,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         switch UserDefaults.standard.string(forKey: "background") {
         case "dim": backgroundSwitch.selectedSegmentIndex = 1
-        case "on": backgroundSwitch.selectedSegmentIndex = 2
+        case "off": backgroundSwitch.selectedSegmentIndex = 2
         default: backgroundSwitch.selectedSegmentIndex = 0
         }
         
@@ -717,7 +715,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     func rotationCheck(isViewInitialising: Bool = false) {
         if orientation.isLandscape {
-            print("landscape")
             spriteKitView.isPaused = true
             spriteKitView.isHidden = true
             
@@ -728,7 +725,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
             }
             
         } else {
-            print("portrait")
             spriteKitView.isPaused = false
             spriteKitView.isHidden = false
             
