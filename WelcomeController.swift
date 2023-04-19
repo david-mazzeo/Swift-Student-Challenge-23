@@ -11,7 +11,7 @@ enum Time {
 class ViewController: UIViewController, CAAnimationDelegate {
     
     let gradient = CAGradientLayer()
-    
+    let continueAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 30, weight: .bold)])
     var orientation = UIInterfaceOrientation.portrait
     
     var areAnimationsRunning = true
@@ -34,6 +34,15 @@ class ViewController: UIViewController, CAAnimationDelegate {
     var tvScreen = UIImageView()
     var continueButton = UIButton()
     var dialogueView = UITextView()
+    
+    var settingsLabel = UILabel()
+    var settingsDescription = UILabel()
+    
+    var motionLabel = UILabel()
+    var motionSwitch = UISegmentedControl(items: ["Motion", "Buttons"])
+    
+    var backgroundLabel = UILabel()
+    var backgroundSwitch = UISegmentedControl(items: ["On", "Dim", "Off"])
     
     var spriteKitView = SKView()
     var rotateLabel = UILabel()
@@ -78,6 +87,23 @@ class ViewController: UIViewController, CAAnimationDelegate {
             
         })
         
+    }
+    
+    @objc func controlChanged(_ sender: UISegmentedControl!) {
+        switch sender.selectedSegmentIndex {
+        case 0: UserDefaults.standard.set("motion", forKey: "controls")
+        case 1: UserDefaults.standard.set("buttons", forKey: "controls")
+        default: break
+        }
+    }
+    
+    @objc func backgroundChanged(_ sender: UISegmentedControl!) {
+        switch sender.selectedSegmentIndex {
+        case 0: UserDefaults.standard.set("on", forKey: "background")
+        case 1: UserDefaults.standard.set("dim", forKey: "background")
+        case 2: UserDefaults.standard.set("off", forKey: "background")
+        default: break
+        }
     }
     
     func presentDialogueTV(complete: @escaping () -> Void) {
@@ -132,13 +158,16 @@ class ViewController: UIViewController, CAAnimationDelegate {
     @objc func continueDialogue() {
         switch currentDialogueStage {
         case 0:
+            
             continueButton.isEnabled = false
             dialogueView.characterByCharacter(string: """
-                    When disaster began to loom, however, a researcher discovered an Ancient Greek myth suggesting the existence of spirits living in the constellations. These findings were presented to the space administration, who begrudgingly approved a flight to the constellation of rebirth — the Phoenix — to acquire a "rebirth" of their home. Such a journey would drain the last of Lunaro's energy supply, turning this into an extremely high-stakes mission.
+                    When disaster began to loom, however, a researcher discovered an Ancient Greek myth suggesting the existence of spirits living in the constellations. These findings were presented to the space administration, who begrudgingly approved a flight to the constellation of rebirth — the Phoenix — to acquire a "rebirth" of their home. Such a journey would drain the last of Lunaro's energy supply, making this an extremely high-stakes mission.
                     """, complete: { [self] in
                 continueButton.isEnabled = true
             })
+            
         case 1:
+            
             continueButton.isEnabled = false
             dialogueView.characterByCharacter(string: """
                     You, a professional space traveller, have been entrusted to pilot this flight. To complete your goal, you need to venture to three of the constellation's stars and collect samples. When fused with each other, the researcher believes, these samples can summon the Phoenix.
@@ -147,12 +176,48 @@ class ViewController: UIViewController, CAAnimationDelegate {
                     """, complete: { [self] in
                         continueButton.isEnabled = true
                     })
+            
         case 2:
+            
+            continueButton.isEnabled = false
+            continueButton.configuration?.attributedTitle = AttributedString("Start", attributes: continueAttributes)
+            
+            UIView.animate(withDuration: 1, animations: { [self] in
+                
+                dialogueView.alpha = 0
+                
+            }, completion: { [self]_ in
+                
+                UIView.animate(withDuration: 1, animations: { [self] in
+                    
+                    settingsLabel.alpha = 1
+                    settingsDescription.alpha = 1
+                    motionLabel.alpha = 1
+                    motionSwitch.alpha = 1
+                    backgroundLabel.alpha = 1
+                    backgroundSwitch.alpha = 1
+                    
+                }, completion: { [self]_ in
+                    
+                    continueButton.isEnabled = true
+                    backgroundSwitch.isEnabled = true
+                    motionSwitch.isEnabled = true
+                    
+                })
+            })
+            
+        case 3:
+            
             let vc = SpaceFlightController()
             vc.modalPresentationStyle = .fullScreen
             self.present(vc, animated: true, completion: nil)
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
+                continueButton.isEnabled = false
+                backgroundSwitch.isEnabled = false
+                motionSwitch.isEnabled = false
+                continueButton.configuration?.attributedTitle = AttributedString("Continue", attributes: continueAttributes)
+                
                 view.layer.removeAllAnimations()
                 gradient.removeAllAnimations()
                 cloudView.layer.removeAllAnimations()
@@ -162,6 +227,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
             }
             
             currentDialogueStage = -1
+            
         default: break
         }
         
@@ -170,6 +236,8 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let segmentColor = UIColor.init(red: 140/255, green: 1, blue: 171/255, alpha: 1)
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             dialogueView.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
@@ -191,15 +259,71 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         dialogueView.isEditable = false
         dialogueView.isSelectable = false
-        dialogueView.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
         dialogueView.textColor = .green
         dialogueView.backgroundColor = .clear
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            dialogueView.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        } else {
+            dialogueView.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
+        }
         
         cloudOne.image = UIImage(named: "Day Clouds")
         cloudTwo.image = UIImage(named: "Day Clouds")
         
         tvScreen.isHidden = true
         tvScreen.image = UIImage(named: "Tall CRT Shape")
+        
+        settingsLabel.text = "Accessibility"
+        settingsLabel.textColor = .green
+        settingsLabel.font = UIFont.systemFont(ofSize: 36, weight: .bold)
+        settingsLabel.textAlignment = .center
+        settingsLabel.alpha = 0
+        
+        settingsDescription.text = "The space administration has designed their fleet with accessibility in mind. Please adjust these preferences to your needs."
+        settingsDescription.textColor = .green
+        settingsDescription.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        settingsDescription.textAlignment = .center
+        settingsDescription.numberOfLines = 0
+        settingsDescription.alpha = 0
+        
+        motionLabel.text = "Steer with..."
+        motionLabel.textColor = .green
+        motionLabel.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
+        motionLabel.textAlignment = .left
+        motionLabel.numberOfLines = 0
+        motionLabel.alpha = 0
+        
+        motionSwitch.selectedSegmentTintColor = segmentColor
+        motionSwitch.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        motionSwitch.addTarget(self, action: #selector(controlChanged(_:)), for: .valueChanged)
+        motionSwitch.isEnabled = false
+        motionSwitch.alpha = 0
+        
+        if UserDefaults.standard.string(forKey: "controls") == "buttons" {
+            motionSwitch.selectedSegmentIndex = 1
+        } else {
+            motionSwitch.selectedSegmentIndex = 0
+        }
+        
+        backgroundLabel.text = "Space Background"
+        backgroundLabel.textColor = .green
+        backgroundLabel.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
+        backgroundLabel.textAlignment = .left
+        backgroundLabel.numberOfLines = 0
+        backgroundLabel.alpha = 0
+        
+        backgroundSwitch.selectedSegmentTintColor = segmentColor
+        backgroundSwitch.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        backgroundSwitch.addTarget(self, action: #selector(backgroundChanged(_:)), for: .valueChanged)
+        backgroundSwitch.isEnabled = false
+        backgroundSwitch.alpha = 0
+        
+        switch UserDefaults.standard.string(forKey: "background") {
+        case "dim": backgroundSwitch.selectedSegmentIndex = 1
+        case "on": backgroundSwitch.selectedSegmentIndex = 2
+        default: backgroundSwitch.selectedSegmentIndex = 0
+        }
         
         goButton.addTarget(self, action: #selector(go), for: .touchUpInside)
         continueButton.addTarget(self, action: #selector(continueDialogue), for: .touchUpInside)
@@ -250,11 +374,19 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         cloudView.addSubview(cloudOne)
         cloudView.addSubview(cloudTwo)
-        
         view.addSubview(cloudView)
+        
         view.addSubview(tvScreen)
         view.addSubview(continueButton)
         view.addSubview(dialogueView)
+        
+        view.addSubview(settingsLabel)
+        view.addSubview(settingsDescription)
+        view.addSubview(motionLabel)
+        view.addSubview(motionSwitch)
+        view.addSubview(backgroundLabel)
+        view.addSubview(backgroundSwitch)
+        
         view.addSubview(spriteKitView)
         view.addSubview(rotateLabel)
         
@@ -270,6 +402,12 @@ class ViewController: UIViewController, CAAnimationDelegate {
         continueButton.translatesAutoresizingMaskIntoConstraints = false
         dialogueView.translatesAutoresizingMaskIntoConstraints = false
         rotateLabel.translatesAutoresizingMaskIntoConstraints = false
+        settingsLabel.translatesAutoresizingMaskIntoConstraints = false
+        settingsDescription.translatesAutoresizingMaskIntoConstraints = false
+        motionLabel.translatesAutoresizingMaskIntoConstraints = false
+        motionSwitch.translatesAutoresizingMaskIntoConstraints = false
+        backgroundLabel.translatesAutoresizingMaskIntoConstraints = false
+        backgroundSwitch.translatesAutoresizingMaskIntoConstraints = false
         
         goButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         goButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30).isActive = true
@@ -317,6 +455,40 @@ class ViewController: UIViewController, CAAnimationDelegate {
         tvScreen.heightAnchor.constraint(equalToConstant: 20).isActive = true
         tvScreen.widthAnchor.constraint(equalToConstant: 20).isActive = true
         
+        settingsLabel.topAnchor.constraint(equalTo: dialogueView.topAnchor).isActive = true
+        settingsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        
+        settingsDescription.topAnchor.constraint(equalTo: settingsLabel.bottomAnchor, constant: 16).isActive = true
+        settingsDescription.leftAnchor.constraint(equalTo: dialogueView.leftAnchor).isActive = true
+        settingsDescription.rightAnchor.constraint(equalTo: dialogueView.rightAnchor).isActive = true
+        
+        motionLabel.topAnchor.constraint(equalTo: settingsDescription.bottomAnchor, constant: 30).isActive = true
+        motionLabel.leftAnchor.constraint(equalTo: dialogueView.leftAnchor).isActive = true
+        
+        backgroundLabel.topAnchor.constraint(equalTo: motionSwitch.bottomAnchor, constant: 30).isActive = true
+        backgroundLabel.leftAnchor.constraint(equalTo: dialogueView.leftAnchor).isActive = true
+        
+        motionSwitch.rightAnchor.constraint(equalTo: dialogueView.rightAnchor).isActive = true
+        backgroundSwitch.rightAnchor.constraint(equalTo: dialogueView.rightAnchor).isActive = true
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            
+            motionSwitch.topAnchor.constraint(equalTo: motionLabel.bottomAnchor, constant: 16).isActive = true
+            motionSwitch.leftAnchor.constraint(equalTo: dialogueView.leftAnchor).isActive = true
+            
+            backgroundSwitch.topAnchor.constraint(equalTo: backgroundLabel.bottomAnchor, constant: 16).isActive = true
+            backgroundSwitch.leftAnchor.constraint(equalTo: dialogueView.leftAnchor).isActive = true
+            
+        } else {
+            
+            motionSwitch.centerYAnchor.constraint(equalTo: motionLabel.centerYAnchor).isActive = true
+            motionSwitch.widthAnchor.constraint(equalToConstant: 300).isActive = true
+            
+            backgroundSwitch.centerYAnchor.constraint(equalTo: backgroundLabel.centerYAnchor).isActive = true
+            backgroundSwitch.widthAnchor.constraint(equalToConstant: 300).isActive = true
+            
+        }
+        
         continueButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         continueButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
         continueButton.widthAnchor.constraint(equalToConstant: 198).isActive = true
@@ -327,13 +499,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
         textHeightConstraint = dialogueView.heightAnchor.constraint(equalToConstant: 20)
         textWidthConstraint = dialogueView.widthAnchor.constraint(equalToConstant: 20)
         
+        textWidthConstraint.isActive = true
+        textHeightConstraint.isActive = true
+        
         rotateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         rotateLabel.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         rotateLabel.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         rotateLabel.isHidden = true
-        
-        textWidthConstraint.isActive = true
-        textHeightConstraint.isActive = true
         
         starView.alpha = 0
 
@@ -478,10 +650,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
     @objc func endGameScene(_ notification: Notification) {
         areAnimationsRunning = true
         tvScreen.isHidden = true
-        continueButton.alpha = 0
-        dialogueView.alpha = 0
         
-        continueButton.isEnabled = false
+        continueButton.alpha = 0
+        settingsLabel.alpha = 0
+        settingsDescription.alpha = 0
+        motionLabel.alpha = 0
+        motionSwitch.alpha = 0
+        backgroundLabel.alpha = 0
+        backgroundSwitch.alpha = 0
         
         textWidthConstraint.constant = 20
         textHeightConstraint.constant = 20

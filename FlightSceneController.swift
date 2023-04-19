@@ -116,6 +116,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     var isAlreadyBlackHole = false
     var healthEvents = true
     var isRoundFinished = false
+    var isForceButtonHeld = false
     var objectPickerMax = 0
     var forceModifier = Double(0)
     var motionEngine = CMMotionManager()
@@ -141,6 +142,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(fireLaser(_:)), name: Notification.Name("fire"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endLaser(_:)), name: Notification.Name("released"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(finishLevel(_:)), name: Notification.Name("finishLevel"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(applyForce(_:)), name: Notification.Name("applyForce"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(releaseForce(_:)), name: Notification.Name("releaseForce"), object: nil)
         
         self.scene?.name = "Game"
         self.backgroundColor = .clear
@@ -196,20 +199,28 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         default: objectPickerMax = 12 // Level 3; asteroids, comets, and black holes.
         }
         
-        motionEngine.accelerometerUpdateInterval = 1/60
-        motionEngine.gyroUpdateInterval = 1/60
-        
-        motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [weak self] (data, error) -> Void in
-            let xAxis = self?.motionEngine.accelerometerData?.acceleration.x ?? 0.0
-            if self?.isSetup == true {
-                self?.protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
-            }
-        })
+        if UserDefaults.standard.string(forKey: "controls") != "buttons" {
+            motionEngine.accelerometerUpdateInterval = 1/60
+            motionEngine.gyroUpdateInterval = 1/60
+            
+            motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [weak self] (data, error) -> Void in
+                let xAxis = self?.motionEngine.accelerometerData?.acceleration.x ?? 0.0
+                if self?.isSetup == true {
+                    self?.protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
+                }
+            })
+        }
         
         run(SKAction.run { [weak self] in
             
+            var baseValue = CGFloat(163)
+            
+            if UserDefaults.standard.string(forKey: "controls") == "buttons" {
+                baseValue = 236
+            }
+            
             self?.protagonist.size = CGSize(width: 72, height: 120)
-            self?.protagonist.position = CGPoint(x: 50, y: 163 + (self?.bottomPadding ?? 0))
+            self?.protagonist.position = CGPoint(x: 50, y: baseValue + (self?.bottomPadding ?? 0))
             self?.protagonist.zRotation = 0
             self?.protagonist.name = "Rocket"
             
@@ -220,7 +231,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             self?.protagonist.physicsBody?.allowsRotation = false
             self?.protagonist.physicsBody?.contactTestBitMask = 1
             self?.protagonist.constraints = [SKConstraint.zRotation(SKRange(constantValue: 0)),
-                                             SKConstraint.positionY(SKRange(constantValue: 163 + (self?.bottomPadding ?? 0))),
+                                             SKConstraint.positionY(SKRange(constantValue: baseValue + (self?.bottomPadding ?? 0))),
                                              SKConstraint.positionX(SKRange(lowerLimit: 1, upperLimit: (self?.deviceWidth ?? 0) - 1))]
             
             self?.physicsBody = SKPhysicsBody(edgeLoopFrom: self?.frame ?? CGRect())
@@ -615,6 +626,32 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         }, SKAction.wait(forDuration: 0.5), SKAction.run {
             NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
         }]))
+    }
+    
+    @objc func applyForce(_ notification: Notification) {
+        let direction = (notification.userInfo?["direction"] as? String) ?? ""
+        var force = CGFloat(0)
+        
+        isForceButtonHeld = true
+        
+        if direction == "left" {
+            force = -20
+        } else {
+            force = 20
+        }
+        
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run { [weak self] in
+            if self?.isForceButtonHeld == true {
+                self?.protagonist.physicsBody!.applyForce(CGVector(dx: force, dy: 0))
+            } else {
+                self?.removeAction(forKey: "force")
+            }
+        }, SKAction.wait(forDuration: 1/60)])), withKey: "force")
+        
+    }
+    
+    @objc func releaseForce(_ notification: Notification) {
+        isForceButtonHeld = false
     }
     
     func random() -> CGFloat {

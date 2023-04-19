@@ -26,6 +26,7 @@ class SpaceFlightController: UIViewController {
     var isAlreadySwitching = false
     
     var orientation = UIInterfaceOrientation.portrait
+    var backgroundAlpha = CGFloat(1)
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     
     var waitingToPresent = false
@@ -42,6 +43,9 @@ class SpaceFlightController: UIViewController {
     var livesButton = UIButton()
     var destroyedButton = UIButton()
     var elapsedButton = UIButton()
+    
+    var leftButton = UIButton()
+    var rightButton = UIButton()
     
     var rotateLabel = UILabel()
     
@@ -65,6 +69,26 @@ class SpaceFlightController: UIViewController {
         NotificationCenter.default.post(name: Notification.Name("released"), object: nil)
     }
     
+    @objc func leftPressed() {
+        rightButton.isEnabled = false
+        NotificationCenter.default.post(name: Notification.Name("applyForce"), object: nil, userInfo: ["direction": "left"])
+    }
+    
+    @objc func rightPressed() {
+        leftButton.isEnabled = false
+        NotificationCenter.default.post(name: Notification.Name("applyForce"), object: nil, userInfo: ["direction": "right"])
+    }
+    
+    @objc func leftReleased() {
+        rightButton.isEnabled = true
+        NotificationCenter.default.post(name: Notification.Name("releaseForce"), object: nil)
+    }
+    
+    @objc func rightReleased() {
+        leftButton.isEnabled = true
+        NotificationCenter.default.post(name: Notification.Name("releaseForce"), object: nil)
+    }
+    
     deinit {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("switchViews"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("asteroidHit"), object: nil)
@@ -78,6 +102,14 @@ class SpaceFlightController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        switch UserDefaults.standard.string(forKey: "background") {
+        case "dim": backgroundAlpha = 0.5
+        case "off": backgroundAlpha = 0
+        default: backgroundAlpha = 1
+        }
+        
+        backgroundView.alpha = backgroundAlpha
         
         orientation = UIInterfaceOrientation(rawValue: (UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation.rawValue ?? 0))!
         
@@ -135,6 +167,18 @@ class SpaceFlightController: UIViewController {
         elementTwoConfig.cornerStyle = .capsule
         elementTwoConfig.titlePadding = -2
         
+        var leftConfig = UIButton.Configuration.tinted()
+        leftConfig.image = UIImage(systemName: "chevron.left.2")
+        leftConfig.baseForegroundColor = .systemPurple
+        leftConfig.baseBackgroundColor = .systemPurple
+        leftConfig.cornerStyle = .capsule
+        
+        var rightConfig = UIButton.Configuration.tinted()
+        rightConfig.image = UIImage(systemName: "chevron.right.2")
+        rightConfig.baseForegroundColor = .systemIndigo
+        rightConfig.baseBackgroundColor = .systemIndigo
+        rightConfig.cornerStyle = .capsule
+        
         elementOneButton.addTarget(self, action: #selector(elementOneFire), for: .touchDown)
         elementOneButton.addTarget(self, action: #selector(elementOneReleased), for: .touchUpInside)
         elementOneButton.addTarget(self, action: #selector(elementOneReleased), for: .touchDragExit)
@@ -143,11 +187,21 @@ class SpaceFlightController: UIViewController {
         elementTwoButton.addTarget(self, action: #selector(elementTwoReleased), for: .touchUpInside)
         elementTwoButton.addTarget(self, action: #selector(elementTwoReleased), for: .touchDragExit)
         
+        leftButton.addTarget(self, action: #selector(leftPressed), for: .touchDown)
+        leftButton.addTarget(self, action: #selector(leftReleased), for: .touchUpInside)
+        leftButton.addTarget(self, action: #selector(leftReleased), for: .touchDragExit)
+        
+        rightButton.addTarget(self, action: #selector(rightPressed), for: .touchDown)
+        rightButton.addTarget(self, action: #selector(rightReleased), for: .touchUpInside)
+        rightButton.addTarget(self, action: #selector(rightReleased), for: .touchDragExit)
+        
         livesButton.configuration = livesConfig
         destroyedButton.configuration = destroyedConfig
         elapsedButton.configuration = elapsedConfig
         elementOneButton.configuration = elementOneConfig
         elementTwoButton.configuration = elementTwoConfig
+        leftButton.configuration = leftConfig
+        rightButton.configuration = rightConfig
         
         rotateLabel.text = "Please rotate your device to portrait mode."
         rotateLabel.font = UIFont.systemFont(ofSize: 30, weight: .semibold)
@@ -196,16 +250,40 @@ class SpaceFlightController: UIViewController {
         bottomBackgroundConstraint = backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 100)
         bottomBackgroundConstraint.isActive = true
         
-        elementOneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
         elementOneButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
         elementOneButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
         elementOneButton.rightAnchor.constraint(equalTo: elementTwoButton.leftAnchor, constant: -10).isActive = true
         elementOneButton.widthAnchor.constraint(equalTo: elementTwoButton.widthAnchor, multiplier: 1).isActive = true
         
-        elementTwoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
         elementTwoButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
         elementTwoButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
         elementTwoButton.widthAnchor.constraint(equalTo: elementOneButton.widthAnchor, multiplier: 1).isActive = true
+        
+        if UserDefaults.standard.string(forKey: "controls") == "buttons" {
+            view.addSubview(leftButton)
+            view.addSubview(rightButton)
+            
+            leftButton.translatesAutoresizingMaskIntoConstraints = false
+            rightButton.translatesAutoresizingMaskIntoConstraints = false
+            
+            leftButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+            leftButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+            leftButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
+            leftButton.rightAnchor.constraint(equalTo: rightButton.leftAnchor, constant: -10).isActive = true
+            leftButton.widthAnchor.constraint(equalTo: rightButton.widthAnchor, multiplier: 1).isActive = true
+            
+            rightButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+            rightButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
+            rightButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+            rightButton.widthAnchor.constraint(equalTo: leftButton.widthAnchor, multiplier: 1).isActive = true
+            
+            elementOneButton.bottomAnchor.constraint(equalTo: leftButton.topAnchor, constant: -16).isActive = true
+            elementTwoButton.bottomAnchor.constraint(equalTo: rightButton.topAnchor, constant: -16).isActive = true
+            
+        } else {
+            elementOneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+            elementTwoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        }
         
         rotateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         rotateLabel.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -306,10 +384,13 @@ class SpaceFlightController: UIViewController {
         livesButton.alpha = 0
         destroyedButton.alpha = 0
         elapsedButton.alpha = 0
+        
+        leftButton.alpha = 0
+        rightButton.alpha = 0
     }
     
     func displayElements() {
-        backgroundView.alpha = 1
+        backgroundView.alpha = backgroundAlpha
         spriteKitView.alpha = 1
         
         if currentView == "Game" {
@@ -319,6 +400,9 @@ class SpaceFlightController: UIViewController {
             livesButton.alpha = 1
             destroyedButton.alpha = 1
             elapsedButton.alpha = 1
+            
+            leftButton.alpha = 1
+            rightButton.alpha = 1
         }
     }
     
@@ -447,6 +531,7 @@ class SpaceFlightController: UIViewController {
     }
     
     func rotationCheck(isViewInitialising: Bool = false, sceneID: Int = 0) {
+        // ID System
         // 0 = No Scene
         // 1 = Flight Scene
         // 2 = Sample Scene
