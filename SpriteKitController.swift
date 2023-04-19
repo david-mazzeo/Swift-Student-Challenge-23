@@ -10,16 +10,17 @@ import SpriteKit
 
 var objectsHit = 0
 var livesRemaining = 3
+var wasLandscape = false
 
 class SpaceFlightController: UIViewController {
     
+    var orientation = UIInterfaceOrientation.portrait
     let gradient = CAGradientLayer()
     var animationTimer = Timer()
     var durationTimer = Timer()
     var currentView = "Game"
     var isEliminated = false
     var isAlreadySwitching = false
-    var isPaused = false
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     var percentElapsed = 0
     
@@ -34,6 +35,8 @@ class SpaceFlightController: UIViewController {
     var livesButton = UIButton()
     var destroyedButton = UIButton()
     var elapsedButton = UIButton()
+    
+    var rotateLabel = UILabel()
     
     @objc func elementOneFire() {
         elementTwoButton.isEnabled = false
@@ -68,6 +71,8 @@ class SpaceFlightController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        orientation = UIInterfaceOrientation(rawValue: (UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation.rawValue ?? 0))!
         
         view.backgroundColor = .black
         
@@ -137,12 +142,18 @@ class SpaceFlightController: UIViewController {
         elementOneButton.configuration = elementOneConfig
         elementTwoButton.configuration = elementTwoConfig
         
+        rotateLabel.text = "Please rotate your device."
+        rotateLabel.font = UIFont.systemFont(ofSize: 30, weight: .semibold)
+        rotateLabel.textColor = .white
+        rotateLabel.textAlignment = .center
+        
         view.addSubview(backgroundView)
         view.addSubview(livesButton)
         view.addSubview(destroyedButton)
         view.addSubview(elapsedButton)
         view.addSubview(elementOneButton)
         view.addSubview(elementTwoButton)
+        view.addSubview(rotateLabel)
         
         livesButton.translatesAutoresizingMaskIntoConstraints = false
         destroyedButton.translatesAutoresizingMaskIntoConstraints = false
@@ -150,6 +161,7 @@ class SpaceFlightController: UIViewController {
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         elementOneButton.translatesAutoresizingMaskIntoConstraints = false
         elementTwoButton.translatesAutoresizingMaskIntoConstraints = false
+        rotateLabel.translatesAutoresizingMaskIntoConstraints = false
         
         livesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         livesButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
@@ -188,8 +200,12 @@ class SpaceFlightController: UIViewController {
         elementTwoButton.heightAnchor.constraint(equalToConstant: 57).isActive = true
         elementTwoButton.widthAnchor.constraint(equalTo: elementOneButton.widthAnchor, multiplier: 1).isActive = true
         
-        initSK()
-        spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+        rotateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        rotateLabel.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        rotateLabel.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        rotateLabel.isHidden = true
+        
+        rotationCheck(isViewInitialising: true, sceneID: 1)
         
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillResignActive(notification:)), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive(notification:)), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -228,9 +244,8 @@ class SpaceFlightController: UIViewController {
             backgroundView.layer.removeAllAnimations()
             cleanSK()
             
-            initSK()
             spriteKitView.alpha = 0
-            spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+            rotationCheck(isViewInitialising: true, sceneID: 1)
             
             UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                 displayElements()
@@ -248,19 +263,22 @@ class SpaceFlightController: UIViewController {
                 backgroundView.layer.removeAllAnimations()
                 cleanSK()
                 
-                initSK()
                 spriteKitView.alpha = 0
                 
+                var scene = 0
+                
                 if currentView == "Game" {
-                    spriteKitView.presentScene(StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                    scene = 2
                     currentView = "Sample"
                 } else if UserDefaults.standard.integer(forKey: "nextLevel") == 4 {
-                    spriteKitView.presentScene(EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                    scene = 3
                     currentView = "Encounter"
                 } else {
-                    spriteKitView.presentScene(FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)))
+                    scene = 1
                     currentView = "Game"
                 }
+                
+                rotationCheck(isViewInitialising: true, sceneID: scene)
                 
                 UIView.animate(withDuration: 1, delay: 0, options: [.curveLinear], animations: { [self] in
                     displayElements()
@@ -319,9 +337,21 @@ class SpaceFlightController: UIViewController {
     }
     
     func initSK() {
-        spriteKitView = SKView(frame: CGRect(x: 0, y: -100, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height + 200))
+        spriteKitView = SKView()
         spriteKitView.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+        
         self.view.insertSubview(spriteKitView, at: 2)
+        
+        spriteKitView.translatesAutoresizingMaskIntoConstraints = false
+        
+        spriteKitView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        spriteKitView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        spriteKitView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        spriteKitView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        if UserDefaults.standard.integer(forKey: "nextLevel") != 1 || currentView == "Sample" {
+            spriteKitView.alpha = 0
+        }
     }
     
     @objc func startLevel(_ notification: Notification) {
@@ -337,7 +367,7 @@ class SpaceFlightController: UIViewController {
         }
         
         durationTimer = Timer.scheduledTimer(withTimeInterval: duration/100, repeats: true, block: { [self] timer in
-            if !isPaused {
+            if !spriteKitView.isPaused {
                 percentElapsed += 1
                 elapsedButton.configuration?.attributedTitle = AttributedString("\(String(percentElapsed))%", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
                 
@@ -380,7 +410,6 @@ class SpaceFlightController: UIViewController {
     
     @objc func applicationWillResignActive(notification: NSNotification) {
         spriteKitView.isPaused = true
-        isPaused = true
         NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
         elementOneButton.isEnabled = true
         elementTwoButton.isEnabled = true
@@ -388,11 +417,101 @@ class SpaceFlightController: UIViewController {
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
         spriteKitView.isPaused = false
-        isPaused = false
     }
     
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
         return [.bottom]
+    }
+    
+    override func viewDidLayoutSubviews() {
+        gradient.frame = CGRect(x: 0, y: -50, width: view.frame.width, height: view.frame.height + 100)
+        
+        if waitingToPresent {
+            rotationCheck()
+        }
+    }
+    
+    var waitingToPresent = false
+    var waitingScene = 0
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        orientation = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation ?? .portrait
+        
+        if !waitingToPresent {
+            rotationCheck()
+        }
+    }
+    
+    func rotationCheck(isViewInitialising: Bool = false, sceneID: Int = 0) {
+        // 0 = No Scene
+        // 1 = Flight Scene
+        // 2 = Sample Scene
+        // 3 = Encounter Scene
+        
+        if orientation.isLandscape {
+            spriteKitView.isPaused = true
+            spriteKitView.isHidden = true
+            
+            rotateLabel.isHidden = false
+            
+            backgroundView.isHidden = true
+            livesButton.isHidden = true
+            destroyedButton.isHidden = true
+            elapsedButton.isHidden = true
+            elementOneButton.isHidden = true
+            elementTwoButton.isHidden = true
+            
+            if isViewInitialising {
+                waitingToPresent = true
+                waitingScene = sceneID
+            }
+            
+        } else {
+            spriteKitView.isPaused = false
+            spriteKitView.isHidden = false
+            
+            rotateLabel.isHidden = true
+            
+            backgroundView.isHidden = false
+            livesButton.isHidden = false
+            destroyedButton.isHidden = false
+            elapsedButton.isHidden = false
+            elementOneButton.isHidden = false
+            elementTwoButton.isHidden = false
+            
+            var sceneToPresent = SKScene()
+            
+            if isViewInitialising {
+                
+                switch sceneID {
+                case 1: sceneToPresent = FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                case 2: sceneToPresent = StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                case 3: sceneToPresent = EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                default: break
+                }
+                
+                wasLandscape = false
+                initSK()
+                spriteKitView.presentScene(sceneToPresent)
+            }
+            
+            if waitingToPresent {
+                
+                switch waitingScene {
+                case 1: sceneToPresent = FlightScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                case 2: sceneToPresent = StarSampleScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                case 3: sceneToPresent = EncounterScene(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+                default: break
+                }
+                
+                wasLandscape = true
+                initSK()
+                spriteKitView.presentScene(sceneToPresent)
+                
+                waitingToPresent = false
+                waitingScene = 0
+            }
+        }
     }
     
 }

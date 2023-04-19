@@ -62,8 +62,8 @@ extension SKScene {
             croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 166) - topPadding + (deviceOffset / 2))
             
         case "Complete":
-            TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 150) - topPadding + (deviceOffset / 2))
-            croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 150) - topPadding + (deviceOffset / 2))
+            TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 200) - topPadding + (deviceOffset / 2))
+            croppedFrame.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - 200) - topPadding + (deviceOffset / 2))
             
         default:
             TVScreen.position = CGPoint(x: deviceWidth / 2, y: (deviceHeight - ((250 - deviceOffset) / 2)) - topPadding + (deviceOffset / 2))

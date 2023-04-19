@@ -16,7 +16,6 @@ class CompleteScene: SKScene {
         self.scene?.name = "Encounter"
         self.backgroundColor = .clear
         self.view?.allowsTransparency = true
-//        self.scaleMode = .aspectFit
         
         let flash = SKShapeNode()
         flash.path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: deviceWidth, height: deviceHeight)).cgPath

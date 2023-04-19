@@ -233,100 +233,108 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             
             if self?.level == 1 {
                 self?.isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                
+                self?.run(SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run {
+                    
                     self?.displayTV(dialogue: "Ah, we've arrived. Let's begin.", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                        self?.hideTV()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                            self?.displayTV(dialogue: "Steer your rocket with motion controls, and fire at asteroids by holding 'Hydrochloric Acid' at the bottom of your device.", speaker: "System")
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                                self?.hideTV()
-                                NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                self?.run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [weak self] in
-                                        if self?.isRoundFinished == false {
-                                            self?.pickObject()
-                                        }
-                                    },
-                                    SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
-                                
-                                                                                                    
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                                    self?.displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
-                                    
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                                        self?.hideTV(complete: { [weak self] in
-                                            self?.isTVOn = false
-                                        })
-                                    }
-                                }
+                }, SKAction.wait(forDuration: 2), SKAction.run {
+                    
+                    self?.hideTV()
+                    
+                }, SKAction.wait(forDuration: 1), SKAction.run {
+                    
+                    self?.displayTV(dialogue: "Steer your rocket with motion controls, and fire at asteroids by holding 'Hydrochloric Acid' at the bottom of your device.", speaker: "System")
+                    
+                }, SKAction.wait(forDuration: 3), SKAction.run {
+                    
+                    self?.hideTV()
+                    NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
+                    
+                    self?.run(SKAction.repeatForever(SKAction.sequence([
+                        SKAction.run { [weak self] in
+                            if self?.isRoundFinished == false {
+                                self?.pickObject()
                             }
-                        }
-                    }
-                }
+                        },
+                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    
+                }, SKAction.wait(forDuration: 1), SKAction.run {
+                    
+                    self?.displayTV(dialogue: "You can gain a life with every 10 objects you destroy, however you'll lose one if your ship gets hit.", speaker: "System")
+                    
+                }, SKAction.wait(forDuration: 3), SKAction.run {
+                    
+                    self?.hideTV(complete: { [weak self] in
+                        self?.isTVOn = false
+                    })
+                    
+                }]))
             }
             
             if self?.level == 2 {
                 self?.isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.run(SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run {
+                    
                     self?.displayTV(dialogue: "Destination set to the second star. Let's do this!", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                        self?.hideTV()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                            self?.displayTV(dialogue: "Comets are present in this area. Melt them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                                self?.hideTV(complete: { [weak self] in
-                                    self?.isTVOn = false
-                                })
-                                
-                                NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                self?.run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [weak self] in
-                                        if self?.isRoundFinished == false {
-                                            self?.pickObject()
-                                        }
-                                    },
-                                    SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                }, SKAction.wait(forDuration: 2), SKAction.run {
+                    
+                    self?.hideTV()
+                    
+                }, SKAction.wait(forDuration: 1), SKAction.run {
+                    
+                    self?.displayTV(dialogue: "Comets are present in this area. Melt them by holding 'Thermal Energy' at the bottom of your device.", speaker: "System")
+                    
+                }, SKAction.wait(forDuration: 3), SKAction.run {
+                    
+                    self?.hideTV(complete: { [weak self] in
+                        self?.isTVOn = false
+                    })
+                    
+                    NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
+                    self?.run(SKAction.repeatForever(SKAction.sequence([
+                        SKAction.run { [weak self] in
+                            if self?.isRoundFinished == false {
+                                self?.pickObject()
                             }
-                        }
-                    }
-                }
+                        },
+                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    
+                }]))
             }
             
             if self?.level == 3 {
                 self?.isTVOn = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                
+                self?.run(SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run {
+                    
                     self?.displayTV(dialogue: "This is the final stretch! You can do this!", speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                        self?.hideTV()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                            self?.displayTV(dialogue: "Black holes are present in this area. Prevent them from sucking you in by steering away from them!", speaker: "System")
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                                self?.hideTV(complete: { [weak self] in
-                                    self?.isTVOn = false
-                                })
-                                
-                                NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                                self?.run(SKAction.repeatForever(SKAction.sequence([
-                                    SKAction.run { [weak self] in
-                                        if self?.isRoundFinished == false {
-                                            self?.pickObject()
-                                        }
-                                    },
-                                    SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                }, SKAction.wait(forDuration: 2), SKAction.run {
+                    
+                    self?.hideTV()
+                    
+                }, SKAction.wait(forDuration: 1), SKAction.run {
+                    
+                    self?.displayTV(dialogue: "Black holes are present in this area. Prevent them from sucking you in by steering away from them!", speaker: "System")
+                    
+                }, SKAction.wait(forDuration: 3), SKAction.run {
+                    
+                    self?.hideTV(complete: { [weak self] in
+                        self?.isTVOn = false
+                    })
+                    
+                    NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
+                    self?.run(SKAction.repeatForever(SKAction.sequence([
+                        SKAction.run { [weak self] in
+                            if self?.isRoundFinished == false {
+                                self?.pickObject()
                             }
-                        }
-                    }
-                }
+                        },
+                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    
+                }]))
             }
         })
     }
@@ -453,11 +461,11 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     isTVOn = true
                     displayTV(dialogue: pickHitDialogue(), speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    run(SKAction.sequence([SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
                         self?.hideTV(complete: { [weak self] in
                             self?.isTVOn = false
                         })
-                    }
+                    }]))
                 }
                 
                 var timerCount = 0
@@ -491,27 +499,21 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                         self?.isTVOn = false
                     })
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    run(SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
                         self?.displayTV(dialogue: self?.pickEliminatedDialogue() ?? "", speaker: "Scientist")
-                        
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
                         self?.hideTV()
-                        
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    }, SKAction.wait(forDuration: 1), SKAction.run {
                         NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
-                    }
-                    }
-                    }
+                    }]))
                 } else {
                     displayTV(dialogue: pickEliminatedDialogue(), speaker: "Scientist")
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    run(SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.run { [weak self] in
                         self?.hideTV()
-                        
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    }, SKAction.wait(forDuration: 1), SKAction.run {
                         NotificationCenter.default.post(Notification(name: Notification.Name("restartLevel")))
-                    }
-                    }
+                    }]))
                 }
                 
             }
@@ -599,22 +601,20 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                 self?.isTVOn = false
             })
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            run(SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
                 self?.displayTV(dialogue: dialogue, speaker: "Scientist")
-            }
+            }]))
         } else {
             displayTV(dialogue: dialogue, speaker: "Scientist")
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+        run(SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.run { [weak self] in
             self?.hideTV(complete: { [weak self] in
                 self?.isTVOn = false
             })
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
-            }
-        }
+        }, SKAction.wait(forDuration: 0.5), SKAction.run {
+            NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
+        }]))
     }
     
     func random() -> CGFloat {

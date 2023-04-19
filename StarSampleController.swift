@@ -9,8 +9,9 @@ import SpriteKit
 
 class StarSampleScene: SKScene {
     
-    let deviceHeight = UIScreen.main.bounds.height
-    let deviceWidth = UIScreen.main.bounds.width
+    var deviceHeight = CGFloat(0)
+    var deviceWidth = CGFloat(0)
+    
     let topPadding = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.safeAreaInsets.top ?? 0
     let level = UserDefaults.standard.integer(forKey: "nextLevel")
     
@@ -28,6 +29,14 @@ class StarSampleScene: SKScene {
     var beamImages = [SKTexture]()
     
     override func didMove(to view: SKView) {
+        
+        if wasLandscape {
+            deviceWidth = UIScreen.main.bounds.height
+            deviceHeight = UIScreen.main.bounds.width
+        } else {
+            deviceHeight = UIScreen.main.bounds.height
+            deviceWidth = UIScreen.main.bounds.width
+        }
         
         var starMultiplier = CGFloat(20)
         var rocketMultiplier = CGFloat(6)
@@ -127,28 +136,30 @@ class StarSampleScene: SKScene {
                  SKAction.wait(forDuration: 2.5),
                  SKAction.fadeAlpha(to: 0, duration: 0.5),
                  SKAction.run { [weak self] in
+                     
                      self?.displayTV(dialogue: "Successfully acquired the \(starName) Sample.", speaker: "System")
                      
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                         self?.hideTV()
-                         
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                         switch self?.level {
-                         case 1: self?.displayTV(dialogue: "First star down! Two more to go!", speaker: "Scientist")
-                         case 2: self?.displayTV(dialogue: "You've collected the second sample, nice work! One left!", speaker: "Scientist")
-                         case 3: self?.displayTV(dialogue: "You got the last sample! Now, prepare to fuse them.", speaker: "Scientist")
-                         default: break
-                         }
-                         
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                         self?.hideTV()
-                         
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                         NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
+                 }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+                     
+                     self?.hideTV()
+                     
+                 }, SKAction.wait(forDuration: 1), SKAction.run { [weak self] in
+                     
+                     switch self?.level {
+                     case 1: self?.displayTV(dialogue: "First star down! Two more to go!", speaker: "Scientist")
+                     case 2: self?.displayTV(dialogue: "You've collected the second sample, nice work! One left!", speaker: "Scientist")
+                     case 3: self?.displayTV(dialogue: "You got the last sample! Now, prepare to fuse them.", speaker: "Scientist")
+                     default: break
                      }
-                     }
-                     }
-                     }
+                     
+                 }, SKAction.wait(forDuration: 2), SKAction.run { [weak self] in
+                     
+                     self?.hideTV()
+                     
+                 }, SKAction.wait(forDuration: 0.5), SKAction.run {
+                     
+                     NotificationCenter.default.post(name: Notification.Name("switchViews"), object: nil)
+                     
                  }]))
     }
     

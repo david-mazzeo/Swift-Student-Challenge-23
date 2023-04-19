@@ -50,8 +50,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
         UIView.animate(withDuration: 1, animations: { [self] in
             goButton.alpha = 0
             aboutButton.alpha = 0
+            wordmark.alpha = 0
         }, completion: { [self] (finished: Bool) in
             
+            wordmark.stopAnimating()
             presentDialogueTV {
                 
                 UIView.animate(withDuration: 0.2, animations: { [self] in
@@ -76,10 +78,17 @@ class ViewController: UIViewController, CAAnimationDelegate {
         
         var widthScale = CGFloat(0)
         var heightScale = CGFloat(0)
+        let orientation = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first?.windowScene?.interfaceOrientation ?? .portrait
         
         if UIDevice.current.userInterfaceIdiom == .pad {
-            widthScale = (self.view.frame.width - 40) / 20
-            heightScale = (self.view.frame.height - 400) / 20
+            
+            if orientation.isLandscape {
+                heightScale = (UIScreen.main.bounds.width - 400) / 20
+                widthScale = (UIScreen.main.bounds.height - 40) / 20
+            } else {
+                heightScale = (UIScreen.main.bounds.height - 400) / 20
+                widthScale = (UIScreen.main.bounds.width - 40) / 20
+            }
             
             textWidthConstraint.constant = (widthScale * 20) - 170
             textHeightConstraint.constant = (heightScale * 20) - 300
@@ -162,7 +171,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         starView.backgroundColor = .clear
         cloudView.backgroundColor = .clear
         
-        wordmark.contentMode = .scaleAspectFit
+        wordmark.contentMode = .center
         wordmark.layer.magnificationFilter = .nearest
         wordmark.animationImages = wordmarkImages
         wordmark.animationDuration = 1
@@ -219,14 +228,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
         view.addSubview(wordmark)
         view.addSubview(aboutButton)
         view.addSubview(starView)
-        view.addSubview(tvScreen)
-        view.addSubview(continueButton)
-        view.addSubview(dialogueView)
         
         cloudView.addSubview(cloudOne)
         cloudView.addSubview(cloudTwo)
         
         view.addSubview(cloudView)
+        view.addSubview(tvScreen)
+        view.addSubview(continueButton)
+        view.addSubview(dialogueView)
         view.addSubview(spriteKitView)
         
         goButton.translatesAutoresizingMaskIntoConstraints = false
@@ -246,10 +255,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
         goButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
         goButton.widthAnchor.constraint(equalToConstant: 161).isActive = true
         
-        wordmark.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 50).isActive = true
-        wordmark.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -50).isActive = true
-        wordmark.bottomAnchor.constraint(equalTo: goButton.topAnchor, constant: 20).isActive = true
+        wordmark.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0).isActive = true
+        wordmark.widthAnchor.constraint(equalToConstant: 496).isActive = true
         wordmark.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        wordmark.bottomAnchor.constraint(equalTo: goButton.topAnchor, constant: 20).isActive = true
         
         aboutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         aboutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
@@ -311,8 +320,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(endGameScene(_:)), name: Notification.Name("endGame"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(returnToTitle(_:)), name: Notification.Name("returnToTitle"), object: nil)
         
-        print(wordmark)
-        
     }
     
     deinit {
@@ -332,6 +339,8 @@ class ViewController: UIViewController, CAAnimationDelegate {
     }
     
     override func viewDidLayoutSubviews() {
+        gradient.frame = CGRect(x: 0, y: -50, width: view.frame.width, height: view.frame.height + 100)
+        
         starView.backgroundColor = UIColor(patternImage: UIImage(named: "Star Pattern.png")!)
         let starGradient = CAGradientLayer()
         
@@ -446,6 +455,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         tvScreen.isHidden = true
         continueButton.isHidden = true
         
+        starView.alpha = 0
         gradient.removeAllAnimations()
         gradient.colors = coloursFromTime(time: .Daytime)
         spriteKitView.isHidden = false
@@ -455,10 +465,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
     @objc func returnToTitle(_ notification: Notification) {
         spriteKitView.presentScene(nil)
         spriteKitView.removeFromSuperview()
+        cycleTime(time: .Evening)
         
-        initTimer()
+        wordmark.startAnimating()
+        
         UIView.animate(withDuration: 1, animations: { [self] in
             goButton.alpha = 1
+            wordmark.alpha = 1
             aboutButton.alpha = 1
         })
     }
@@ -471,6 +484,17 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
         initTimer()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if cloudView.layer.animationKeys()?.isEmpty == true || cloudView.layer.animationKeys() == nil {
+            initTimer()
+        }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        cloudView.layer.removeAllAnimations()
+        self.cloudView.transform = CGAffineTransform(translationX: 0, y: 0)
     }
     
 }
