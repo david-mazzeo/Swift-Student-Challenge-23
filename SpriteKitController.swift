@@ -11,6 +11,7 @@ import SpriteKit
 var objectsHit = 0
 var livesRemaining = 3
 var wasLandscape = false
+var objectPicker = SKAction()
 
 class SpaceFlightController: UIViewController {
     
@@ -22,6 +23,7 @@ class SpaceFlightController: UIViewController {
     var currentView = "Game"
     var percentElapsed = 0
     
+    var isFirstPlay = true
     var isEliminated = false
     var isAlreadySwitching = false
     var isBackgroundAnimating = false
@@ -328,6 +330,7 @@ class SpaceFlightController: UIViewController {
             
         }, completion: { [self] (finished: Bool) in
             backgroundView.layer.removeAllAnimations()
+            isBackgroundAnimating = false
             cleanSK()
             
             spriteKitView.alpha = 0
@@ -412,7 +415,9 @@ class SpaceFlightController: UIViewController {
         destroyedButton.configuration?.attributedTitle = AttributedString("0", attributes: HUDAttributes)
         livesButton.configuration?.attributedTitle = AttributedString("3", attributes: HUDAttributes)
         
+        objectPicker = SKAction()
         animationTimer.invalidate()
+        isBackgroundAnimating = false
         durationTimer.invalidate()
         percentElapsed = 0
         
@@ -441,8 +446,10 @@ class SpaceFlightController: UIViewController {
         spriteKitView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         spriteKitView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
-        if UserDefaults.standard.integer(forKey: "nextLevel") != 1 || currentView == "Sample" {
+        if !isFirstPlay || currentView == "Sample" {
             spriteKitView.alpha = 0
+        } else if isFirstPlay {
+            isFirstPlay = false
         }
     }
     
@@ -466,8 +473,6 @@ class SpaceFlightController: UIViewController {
                 
                 if percentElapsed >= 100 {
                     NotificationCenter.default.post(name: NSNotification.Name("finishLevel"), object: nil)
-                    animationTimer.invalidate()
-                    isBackgroundAnimating = false
                     timer.invalidate()
                 }
             }
@@ -480,6 +485,7 @@ class SpaceFlightController: UIViewController {
     
     @objc func lifeLost(_ notification: Notification) {
         if livesRemaining == 0 {
+            objectPicker = SKAction()
             durationTimer.invalidate()
             isEliminated = true
             
@@ -499,23 +505,43 @@ class SpaceFlightController: UIViewController {
             })
         }
         
+        if livesRemaining == 1 {
+            livesButton.configuration?.subtitle = "life left"
+        } else {
+            livesButton.configuration?.subtitle = "lives left"
+        }
+        
         livesButton.configuration?.attributedTitle = AttributedString(String(livesRemaining), attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
     }
     
     @objc func applicationWillResignActive(notification: NSNotification) {
+        print("RESIGNED")
+        spriteKitView.scene?.removeAction(forKey: "objectPicker")
         spriteKitView.isPaused = true
+        objectPicker.speed = 0
+        
         animationTimer.invalidate()
+        backgroundView.layer.removeAllAnimations()
+        backgroundView.transform = CGAffineTransformIdentity
+        
         NotificationCenter.default.post(name: NSNotification.Name("released"), object: nil)
+        
         elementOneButton.isEnabled = true
         elementTwoButton.isEnabled = true
     }
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
+        print("ACTIVE")
+        
+        if objectPicker != SKAction() {
+            spriteKitView.scene?.run(objectPicker, withKey: "objectPicker")
+        }
         if isBackgroundAnimating {
             animateBackground()
         }
         
         spriteKitView.isPaused = false
+        objectPicker.speed = 1
     }
     
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {

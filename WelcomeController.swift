@@ -180,6 +180,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         case 2:
             
             continueButton.isEnabled = false
+            
             continueButton.configuration?.attributedTitle = AttributedString("Start", attributes: continueAttributes)
             
             UIView.animate(withDuration: 1, animations: { [self] in
@@ -187,10 +188,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
                 dialogueView.alpha = 0
                 
             }, completion: { [self]_ in
-                
-                continueButton.isEnabled = true
-                backgroundSwitch.isEnabled = true
-                motionSwitch.isEnabled = true
                 
                 UIView.animate(withDuration: 1, animations: { [self] in
                     
@@ -200,6 +197,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
                     motionSwitch.alpha = 1
                     backgroundLabel.alpha = 1
                     backgroundSwitch.alpha = 1
+                    
+                }, completion: { [self]_ in
+                    
+                    continueButton.isEnabled = true
                     
                 })
             })
@@ -230,6 +231,20 @@ class ViewController: UIViewController, CAAnimationDelegate {
         }
         
         currentDialogueStage += 1
+    }
+    
+    @objc func displayAbout() {
+        let vc = AboutController()
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            vc.modalPresentationStyle = .popover
+            vc.preferredContentSize = CGSize(width: 500, height: 140)
+            vc.popoverPresentationController?.permittedArrowDirections = .down
+            vc.popoverPresentationController?.sourceRect = aboutButton.frame
+            vc.popoverPresentationController?.sourceView = self.view
+        }
+        
+        self.present(vc, animated: true, completion: nil)
     }
     
     override func viewDidLoad() {
@@ -295,7 +310,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         motionSwitch.selectedSegmentTintColor = segmentColor
         motionSwitch.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
         motionSwitch.addTarget(self, action: #selector(controlChanged(_:)), for: .valueChanged)
-        motionSwitch.isEnabled = false
         motionSwitch.alpha = 0
         
         if UserDefaults.standard.string(forKey: "controls") == "buttons" {
@@ -314,7 +328,6 @@ class ViewController: UIViewController, CAAnimationDelegate {
         backgroundSwitch.selectedSegmentTintColor = segmentColor
         backgroundSwitch.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
         backgroundSwitch.addTarget(self, action: #selector(backgroundChanged(_:)), for: .valueChanged)
-        backgroundSwitch.isEnabled = false
         backgroundSwitch.alpha = 0
         
         switch UserDefaults.standard.string(forKey: "background") {
@@ -358,6 +371,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         aboutButton.configuration = aboutConfig
         continueButton.configuration = continueConfig
         
+        aboutButton.addTarget(self, action: #selector(displayAbout), for: .touchUpInside)
         continueButton.isEnabled = false
         
         rotateLabel.text = "Please rotate your device to portrait mode."

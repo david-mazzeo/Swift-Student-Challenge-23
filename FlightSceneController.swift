@@ -124,6 +124,7 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
     var healthEvents = true
     var isRoundFinished = false
     var isForceButtonHeld = false
+    
     var objectPickerMax = 0
     var forceModifier = Double(0)
     var motionEngine = CMMotionManager()
@@ -142,6 +143,16 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("fire"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("released"), object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name("finishLevel"), object: nil)
+    }
+    
+    func initialiseObjectPicker() {
+        objectPicker = SKAction.repeatForever(SKAction.sequence([
+            SKAction.run { [weak self] in
+                if self?.isRoundFinished == false {
+                    self?.pickObject()
+                }
+            },
+            SKAction.wait(forDuration: 0.6, withRange: 0.4)]))
     }
     
     override func didMove(to view: SKView) {
@@ -273,13 +284,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     self?.hideTV()
                     NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
                     
-                    self?.run(SKAction.repeatForever(SKAction.sequence([
-                        SKAction.run { [weak self] in
-                            if self?.isRoundFinished == false {
-                                self?.pickObject()
-                            }
-                        },
-                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    self?.initialiseObjectPicker()
+                    self?.run(objectPicker, withKey: "objectPicker")
                     
                 }, SKAction.wait(forDuration: 1), SKAction.run {
                     
@@ -315,13 +321,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     })
                     
                     NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                    self?.run(SKAction.repeatForever(SKAction.sequence([
-                        SKAction.run { [weak self] in
-                            if self?.isRoundFinished == false {
-                                self?.pickObject()
-                            }
-                        },
-                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    self?.initialiseObjectPicker()
+                    self?.run(objectPicker, withKey: "objectPicker")
                     
                 }]))
             }
@@ -348,13 +349,8 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
                     })
                     
                     NotificationCenter.default.post(Notification(name: Notification.Name("startLevel")))
-                    self?.run(SKAction.repeatForever(SKAction.sequence([
-                        SKAction.run { [weak self] in
-                            if self?.isRoundFinished == false {
-                                self?.pickObject()
-                            }
-                        },
-                        SKAction.wait(forDuration: 0.6, withRange: 0.4)])))
+                    self?.initialiseObjectPicker()
+                    self?.run(objectPicker, withKey: "objectPicker")
                     
                 }]))
             }
