@@ -444,10 +444,10 @@ class ViewController: UIViewController, CAAnimationDelegate {
         aboutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         aboutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
         
-        spriteKitView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        spriteKitView.topAnchor.constraint(equalTo: view.topAnchor, constant: -50).isActive = true
         spriteKitView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         spriteKitView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        spriteKitView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        spriteKitView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 50).isActive = true
         
         starView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         starView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true

@@ -13,7 +13,7 @@ class CompleteScene: SKScene {
     let deviceWidth = UIScreen.main.bounds.width
     
     override func didMove(to view: SKView) {
-        self.scene?.name = "Encounter"
+        self.scene?.name = "Complete"
         self.backgroundColor = .clear
         self.view?.allowsTransparency = true
         
@@ -29,7 +29,7 @@ class CompleteScene: SKScene {
            SKAction.run {
                self.displayTV(dialogue: "Hey, wake up!", speaker: "Scientist")
            }, SKAction.wait(forDuration: 2), SKAction.run {
-               self.scene?.name = "Complete"
+               self.scene?.name = "WokenUp"
                self.hideTV()
            }, SKAction.wait(forDuration: 1), SKAction.run {
                flash.run(SKAction.fadeAlpha(to: 0, duration: 2))
