@@ -228,7 +228,11 @@ class FlightScene: SKScene, SKPhysicsContactDelegate {
             motionEngine.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: { [weak self] (data, error) -> Void in
                 let xAxis = self?.motionEngine.accelerometerData?.acceleration.x ?? 0.0
                 if self?.isSetup == true {
-                    self?.protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
+                    if orientation == .portraitUpsideDown {
+                        self?.protagonist.physicsBody!.applyForce(CGVector(dx: -(40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
+                    } else {
+                        self?.protagonist.physicsBody!.applyForce(CGVector(dx: (40 * xAxis) + (self?.forceModifier ?? 0), dy: 0))
+                    }
                 }
             })
         }

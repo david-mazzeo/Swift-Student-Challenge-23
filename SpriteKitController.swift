@@ -12,6 +12,7 @@ var objectsHit = 0
 var livesRemaining = 3
 var wasLandscape = false
 var objectPicker = SKAction()
+var orientation = UIInterfaceOrientation.portrait
 
 class SpaceFlightController: UIViewController {
     
@@ -28,7 +29,6 @@ class SpaceFlightController: UIViewController {
     var isAlreadySwitching = false
     var isBackgroundAnimating = false
     
-    var orientation = UIInterfaceOrientation.portrait
     var backgroundAlpha = CGFloat(1)
     let HUDAttributes = AttributeContainer([.font: UIFont.systemFont(ofSize: 18, weight: .bold)])
     
