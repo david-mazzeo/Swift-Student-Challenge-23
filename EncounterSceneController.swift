@@ -312,7 +312,7 @@ class EncounterScene: SKScene {
                      UserDefaults.standard.set(5, forKey: "nextLevel")
                      NotificationCenter.default.post(Notification(name: Notification.Name("endGame")))
                  }]))
-        }]))
+        }]), withKey: "encounterDialogue")
         
         self.addChild(redBeam)
         self.addChild(yellowBeam)

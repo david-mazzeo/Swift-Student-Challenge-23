@@ -515,10 +515,14 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func applicationWillResignActive(notification: NSNotification) {
-        print("RESIGNED")
+        
         spriteKitView.scene?.removeAction(forKey: "objectPicker")
         spriteKitView.isPaused = true
         objectPicker.speed = 0
+        
+        if let cutscene = spriteKitView.scene?.action(forKey: "encounterDialogue") {
+            cutscene.speed = 0
+        }
         
         animationTimer.invalidate()
         backgroundView.layer.removeAllAnimations()
@@ -531,11 +535,15 @@ class SpaceFlightController: UIViewController {
     }
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
-        print("ACTIVE")
         
         if objectPicker != SKAction() {
             spriteKitView.scene?.run(objectPicker, withKey: "objectPicker")
         }
+        
+        if let cutscene = spriteKitView.scene?.action(forKey: "encounterDialogue") {
+            cutscene.speed = 1
+        }
+        
         if isBackgroundAnimating {
             animateBackground()
         }
