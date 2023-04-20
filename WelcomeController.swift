@@ -17,6 +17,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
     var areAnimationsRunning = true
     var waitingToPresent = false
     var isListeningForOrientation = false
+    var isFirstOpen = true
     
     var wordmark = UIImageView()
     
@@ -117,9 +118,18 @@ class ViewController: UIViewController, CAAnimationDelegate {
             if orientation.isLandscape {
                 heightScale = (UIScreen.main.bounds.width - 400) / 20
                 widthScale = (UIScreen.main.bounds.height - 40) / 20
+                
             } else {
                 heightScale = (UIScreen.main.bounds.height - 400) / 20
                 widthScale = (UIScreen.main.bounds.width - 40) / 20
+            }
+            
+            if heightScale > 34 {
+                heightScale = 34
+            }
+            
+            if widthScale > 38.5 {
+                widthScale = 38.5
             }
             
             textWidthConstraint.constant = (widthScale * 20) - 170
@@ -504,7 +514,7 @@ class ViewController: UIViewController, CAAnimationDelegate {
         continueButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         continueButton.heightAnchor.constraint(equalToConstant: 66).isActive = true
         continueButton.widthAnchor.constraint(equalToConstant: 198).isActive = true
-        continueButton.topAnchor.constraint(equalTo: dialogueView.bottomAnchor, constant: -30).isActive = true
+        continueButton.topAnchor.constraint(equalTo: dialogueView.bottomAnchor, constant: 30).isActive = true
         
         dialogueView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         dialogueView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50).isActive = true
@@ -713,6 +723,14 @@ class ViewController: UIViewController, CAAnimationDelegate {
     
     @objc func applicationDidBecomeActive(notification: NSNotification) {
         initTimer()
+        isFirstOpen = false
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if isFirstOpen {
+            initTimer()
+            isFirstOpen = false
+        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
